@@ -1,8 +1,33 @@
+var byId = function(id)
+{
+	return document.getElementById(id);
+};
+
 var _ = function(chaine)
 {
 	return chaine;
 };
 
+var newDom = function(nom)
+{
+	return document.createElement(nom);
+};
+
+var delDom = function(element)
+{
+	if (element.hasChildNodes())
+	{
+		element.removeChild(element.firstChild);
+	};
+};
+
+var emptyDom = function(element)
+{
+	while(element.hasChildNodes())
+	{
+		element.removeChild(element.firstChild);
+	};
+};
 var randInt = function(min, max)
 {
     return Math.floor(Math.random()*(max-min))+min;
