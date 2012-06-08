@@ -20,10 +20,10 @@ function JsCHRIST()
 	this.canvasLine = this.screenLine.getContext('2d');
 	
 	this.data = [];
-	this.timeMin = undefined;
-	this.timeMax = undefined;
-	this.dataMin = undefined;
-	this.dataMax = undefined;
+	this.timeMin = 999999999999999;
+	this.timeMax = 0;
+	this.dataMin = 999999999999999;
+	this.dataMax = 0;
 
 	// Optimisations temporaires
 	this.i = 0;
@@ -82,12 +82,12 @@ JsCHRIST.prototype =
 			$(canard.srcElement).addClass('selected');
 
 			$.ajax({
-				url: "../app/RestJson/data_dt/"+encodeURIComponent(nom),
+				url: "../app/RestJson/data/"+encodeURIComponent(nom),
 				success: function(json) {
 					obj.data = [];
 					for (var i = 0; i < json.data.length; ++i)
 					{
-						obj.addTuple({time_t: json.data[i].dt, data: json.data[i].rythme});
+						obj.addTuple({time_t: json.data[i].time_t, data: json.data[i].rythme});
 					}
 
 					obj.paintGraph(true);
@@ -169,55 +169,58 @@ JsCHRIST.prototype =
 
 		this.paintedMousePose = this.mousePos;
 	},
-
-	paintGraph: function(fullPaint)
-	{
-		//console.log("Paint");
-
+	
+	/**
+	* Draws the line, proportionnaly to the height and width of the box from where it belongs to.
+	*/
+	paintGraph: function(fullPaint){
 		var c = this.canvasGraph;
 		
-		if (fullPaint)
-		{
+		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
+		if(this.timeMax != this.timeMin) var coef_x = this.width / (this.timeMax - this.timeMin);
+		if(this.dataMax != this.dataMin) var coef_y = this.height / (this.dataMax - this.dataMin);
+		
+		console.log("coefx : " + coef_x + " coefy : " + coef_y);
+		
+		if (fullPaint){
 			c.clearRect(0,0, this.width, this.height);
+			
+			//se placer au dernier point du tracé, en définissant this.x_i et x_y
+			//dans le cas d'un fullpaint, c'est le premier point...
 			this.x_i = 0;
 			if (this.data.length > 0)
 			{
-				this.i = 1;
-				this.y_i = this.height-this.data[0].data;
+				this.y_i = this.height-(this.data[0].data * coef_y);
 			}
 			else
 			{
-				this.i = 0;
 				this.y_i = 0;
 			}
 		}
-
+		
 		c.beginPath();
 		c.strokeStyle = "yellowgreen";
 		c.lineWidth = 2;
-		/*c.shadowBlur = 3;
-		c.shadowColor = "black";
-		c.shadowOffsetX = 1;
-		c.shadowOffsetY = 1;*/
 		c.moveTo(this.x_i,this.y_i);
-
-		for (; this.i < this.data.length; ++this.i)
-		{
-			this.x_i = this.i * 3;
-			this.y_i = this.height-this.data[this.i].data;
+		
+		for(var i = 1; i < this.data.length; ++i){
+			this.x_i = Date.parse(this.data[i].time_t) * coef_x;
+			this.y_i = this.data[i].data * coef_y;
 			c.lineTo(this.x_i, this.y_i);
 		}
-
+		
 		c.stroke();
 		c.closePath();
 	},
 
 	addTuple: function(tuple)
 	{
-		if (tuple.time_t < this.timeMin) this.timeMin = tuple.time_t;
-		if (tuple.time_t > this.timeMax) this.timeMax = tuple.time_t;
+		if (Date.parse(tuple.time_t) < this.timeMin) this.timeMin = Date.parse(tuple.time_t);
+		if (Date.parse(tuple.time_t) > this.timeMax) this.timeMax = Date.parse(tuple.time_t);
 		if (tuple.data < this.dataMin) this.dataMin = tuple.data;
-		if (tuple.data > this.dataMax) this.dataMin = tuple.data;
+		if (tuple.data > this.dataMax) this.dataMax = tuple.data;
+		
+		console.log(""+ this.timeMax + " ; " + this.timeMin);
 
 		this.data.push(tuple);
 	}
