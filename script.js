@@ -76,7 +76,8 @@ JsCHRIST.prototype =
 
 		var obj = this;
 		var clic_releve = function(canard) {
-			var nom = canard.srcElement.firstChild.data;
+			log(canard);
+			var nom = canard.srcElement ? canard.srcElement.firstChild.data : canard.target.firstChild.data;
 			$('#reportList li').removeClass('selected');
 			$(canard.srcElement).addClass('selected');
 
@@ -111,8 +112,8 @@ JsCHRIST.prototype =
 					log(report);
 				}
 			},
-			error: function() {
-				log("canard");
+			error: function(e) {
+				alert(e.status == 401 ? "Vous devez vous connecter." : e.statusText);
 			}});
 
 		$(this.screen).mousemove(function(e) {
