@@ -49,7 +49,11 @@ color:white;
 height:50%;
 }
 
-#screen canvas {
+.box {
+position:relative;
+}
+
+.box canvas {
 position:absolute;
 top:4px;
 left:8px;
@@ -94,11 +98,10 @@ background:rgba(255,255,255,0.1);
 background:rgba(255,255,255,0.3);
 }
 
-#infosBox {
+#infosBox, #canard3Box {
 width:33%;
 height:45%;
 /*position:absolute;*/
-bottom:0.5em;
 }
 
 #infosBox .number {
