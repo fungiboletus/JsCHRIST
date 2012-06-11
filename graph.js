@@ -98,10 +98,11 @@ JsCHRIST_Graph.prototype =
 		for(var key in this.core.data)
 		{
 			log(key);
-			var c = this.canvasGraph;
 			
+			var c = this.canvasGraph;
 
 			var data = this.core.data[key].data;
+			
 			if (fullPaint)
 			{
 				c.clearRect(0,0, this.width, this.height);
@@ -118,7 +119,15 @@ JsCHRIST_Graph.prototype =
 					this.y_i = 0;
 				//}
 			//}
-
+			
+			//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
+			//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
+			if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
+				var coef_x = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+				
+			if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
+				var coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+			
 			c.beginPath();
 			c.strokeStyle = colors.pop();
 			c.lineWidth = 2;
@@ -127,11 +136,12 @@ JsCHRIST_Graph.prototype =
 			c.shadowOffsetX = 1;
 			c.shadowOffsetY = 1;*/
 			c.moveTo(this.x_i,this.y_i);
-
+			
 			for (; this.i < data.length; ++this.i)
 			{
-				this.x_i = this.i * 3;
-				this.y_i = this.height-data[this.i].data;
+				this.x_i = (Date.parse(data[this.i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
+				this.y_i = this.height - ((data[this.i].data - this.core.data[key].dataMin) * coef_y);
+				
 				c.lineTo(this.x_i, this.y_i);
 			}
 

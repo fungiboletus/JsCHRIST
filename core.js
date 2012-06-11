@@ -48,22 +48,23 @@ JsCHRIST.prototype =
 			$.ajax({
 				url: "../app/RestJson/data_dt/"+encodeURIComponent(nom),
 				success: function(json) {
+					var start_t = Date.parse(json.start_t);
 					var data  = {
-						timeMin: undefined,
-						timeMax: undefined,
-						dataMin: undefined,
-						dataMax: undefined,
+						timeMin: new Date(start_t),
+						timeMax: start_t,
+						dataMin: json.data[0].rythme,
+						dataMax: json.data[0].rythme,
 						data: []
 					};
 
 					obj.data[nom] = data;
 
 					$(obj).trigger("jschrist.add_statement", {name: nom});
-				
-					var start_t = Date.parse(json.start_t);
+					
 					for (var i = 0; i < json.data.length; ++i)
 					{
-						obj.addTuple(data, {time_t: new Date(start_t+json.data[i].dt), data: json.data[i].rythme});
+						start_t += json.data[i].dt;
+						obj.addTuple(data, {time_t: new Date(start_t), data: json.data[i].rythme});
 					}
 
 					$(obj).trigger("jschrist.new_tuples", {
@@ -102,7 +103,7 @@ JsCHRIST.prototype =
 		if (tuple.time_t < data.timeMin) data.timeMin = tuple.time_t;
 		if (tuple.time_t > data.timeMax) data.timeMax = tuple.time_t;
 		if (tuple.data < data.dataMin) data.dataMin = tuple.data;
-		if (tuple.data > data.dataMax) data.dataMin = tuple.data;
+		if (tuple.data > data.dataMax) data.dataMax = tuple.data;
 
 		data.data.push(tuple);
 	}
