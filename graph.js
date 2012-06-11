@@ -14,9 +14,8 @@ JsCHRIST_Graph = function(core, screen)
 	this.canvasLine = this.screenLine.getContext('2d');
 	
 	// Optimisations temporaires
-	this.i = 0;
-	this.x_i = 0;
-	this.y_i = 0;
+	this.x_i = {};
+	this.y_i = {};
 
 	// Position de la souris
 	this.mousePos = 0;
@@ -37,7 +36,7 @@ JsCHRIST_Graph = function(core, screen)
 	$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
 	$(core).bind("jschrist.new_tuples", function(a, b)
 	{
-		obj.paintGraph(true);
+		obj.paintGraph(false, b.data);
 	});
 	/*intervalle = window.setInterval((function(self) {
 		return function() {
@@ -90,23 +89,39 @@ JsCHRIST_Graph.prototype =
 		this.paintedMousePose = this.mousePos;
 	},
 
-	paintGraph: function(fullPaint)
+	paintGraph: function(fullPaint, data)
 	{
 		//log(this.core.data);
-		console.log("Paint");
+	console.log("Paint");
 		var colors = ['blue', 'purple', 'red', 'yellowgreen'];
 		for(var key in this.core.data)
 		{
-			log(key);
 			var c = this.canvasGraph;
 			
+			var x_i = this.x_i[key];
+			var y_i = this.y_i[key];
 
-			var data = this.core.data[key].data;
+			if (x_i == undefined) x_i = 0;
+			if (y_i == undefined) y_i = this.height-data[0].data;
+
+			var debut = 0;
+
 			if (fullPaint)
 			{
+				data = this.core.data[key].data;
 				c.clearRect(0,0, this.width, this.height);
+				x_i = 0; //(this.core.data[key].data.length - data.length)*3;
+				//this.y_i = 0;
+				y_i = this.height-data[0].data;
+
+				if (data.length * 3 > this.width)
+					debut = data.length - this.width / 3; 
 			}
-				this.x_i = 0;
+			else if (data == undefined)
+			{
+				data = this.core.data[key].data;
+			}
+
 				/*if (this.core.data.length > 0)
 				{
 					this.i = 1;
@@ -114,8 +129,6 @@ JsCHRIST_Graph.prototype =
 				}
 				else
 				{*/
-					this.i = 0;
-					this.y_i = 0;
 				//}
 			//}
 
@@ -126,19 +139,40 @@ JsCHRIST_Graph.prototype =
 			c.shadowColor = "black";
 			c.shadowOffsetX = 1;
 			c.shadowOffsetY = 1;*/
-			c.moveTo(this.x_i,this.y_i);
+			c.moveTo(x_i,y_i);
 
-			for (; this.i < data.length; ++this.i)
+			for (var i = debut; i < data.length-debut; ++i)
 			{
-				this.x_i = this.i * 3;
-				this.y_i = this.height-data[this.i].data;
-				c.lineTo(this.x_i, this.y_i);
+				x_i += 3;
+
+				if (x_i > this.width)
+				{
+					this.decalerGraph(3);
+					c.moveTo(x_i-6,y_i);
+					x_i -= 3;
+				}
+
+				y_i = this.height-data[i].data;
+				c.lineTo(x_i, y_i);
 			}
 
 			c.stroke();
 			c.closePath();
 
 			fullPaint = false;
+			
+			this.x_i[key] = x_i;
+			this.y_i[key] = y_i;
 		}
 	},
+
+	decalerGraph: function(decalage)
+	{
+		var c = this.canvasGraph;
+		var imgData = c.getImageData(0,0,this.width, this.height);
+
+		c.clearRect(this.width-decalage,0, decalage, this.height);
+		//c.clearRect(0,0, this.width, this.height);
+		c.putImageData(imgData, -decalage, 0);
+	}
 }

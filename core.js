@@ -61,15 +61,23 @@ JsCHRIST.prototype =
 					$(obj).trigger("jschrist.add_statement", {name: nom});
 				
 					var start_t = Date.parse(json.start_t);
-					for (var i = 0; i < json.data.length; ++i)
-					{
-						obj.addTuple(data, {time_t: new Date(start_t+json.data[i].dt), data: json.data[i].rythme});
-					}
 
-					$(obj).trigger("jschrist.new_tuples", {
-						statement_name: nom,
-						data: data
-					});
+					var i = 0;
+
+					var intervale = window.setInterval(function(){
+						var tuple = {time_t: new Date(start_t+json.data[i].dt), data: json.data[i].rythme};
+						obj.addTuple(data, tuple); 
+
+						$(obj).trigger("jschrist.new_tuples", {
+							statement_name: nom,
+							data: [tuple]
+						});
+
+						if (++i == json.data.length)
+							window.clearInterval(intervale);
+
+					}, 42);
+
 				},
 				error: function() {
 					alert("oops");
