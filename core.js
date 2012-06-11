@@ -51,10 +51,6 @@ JsCHRIST.prototype =
 					var start_t = Date.parse(json.start_t);
 					var date = new Date(start_t);
 					var data  = {
-						time_tMin: date,
-						time_tMax: date,
-						rythmeMin: json.data[0].rythme,
-						rythmeMax: json.data[0].rythme,
 						data: []
 					};
 
@@ -129,10 +125,10 @@ JsCHRIST.prototype =
 		{
 			var keyMin = key+'Min';
 			var keyMax = key+'Max';
-			if (tuple[key] < data[keyMin]) data[keyMin] = tuple[key];
-			if (tuple[key] > data[keyMax]) data[keyMax] = tuple[key];
+			if (!(keyMin in data) || tuple[key] < data[keyMin]) data[keyMin] = tuple[key];
+			if (!(keyMax in data) || tuple[key] > data[keyMax]) data[keyMax] = tuple[key];
 		}
-
+		log(data);
 		data.data.push(tuple);
 	}
 };
