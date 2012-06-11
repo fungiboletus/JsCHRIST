@@ -1,23 +1,28 @@
 JsCHRIST_Graph = function(core, screen)
 {
+	// Représente l'instance des données à traiter
 	this.core = core;
+
+	// Zonede travail du graphique
 	this.screen = screen;
 
+	// Objet Canvas représentant les courbes
 	this.screenGraph = newDom('canvas');
 	this.screenGraph.id = "screenGraph";
 	this.screen.appendChild(this.screenGraph);
 	this.canvasGraph = this.screenGraph.getContext('2d');
-	
+
+	// Objet Canvas représentant la ligne de sélection
 	this.screenLine = newDom('canvas');
 	this.screenLine.id = "screenLine";
 	this.screen.appendChild(this.screenLine);
 	this.canvasLine = this.screenLine.getContext('2d');
 	
-	// Optimisations temporaires
+	// Dernières positions des points tracés
 	this.x_i = {};
 	this.y_i = {};
 	
-	//coefficients pour l'echelle
+	// Coefficients pour l'echelle
 	this.coef_x = undefined;
 	this.coef_y = undefined;
 	
@@ -29,6 +34,7 @@ JsCHRIST_Graph = function(core, screen)
 	this.manageSize();
 	$(window).resize(this, this.manageSize);
 
+	// Gestion simple de la synchronisation du temps
 	var obj = this;
 	$(this.screen).mousemove(function(e) {
 		obj.mousePos = e.offsetX;
@@ -47,6 +53,7 @@ JsCHRIST_Graph = function(core, screen)
 
 JsCHRIST_Graph.prototype =
 {
+	// Gestion de la taille du graphe
 	manageSize: function(obj)
 	{
 		var obj = obj == null ? this : obj.data;
@@ -61,10 +68,12 @@ JsCHRIST_Graph.prototype =
 		//obj.paintGraph(true);
 	},
 
-	paintLine: function(fullPaint)
+	// Afficher la ligne de sélection
+	paintLine: function()
 	{
 		var c = this.canvasLine;
 
+		// Masquage de l'ancien emplacement
 		if (this.paintedMousePose >= 0)
 			c.clearRect(this.paintedMousePose - 5,0, 10, this.height);
 
@@ -83,7 +92,6 @@ JsCHRIST_Graph.prototype =
 	{
 		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
 		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
-		// TODO date parse
 		if(this.core.data[key].timeMax != this.core.data[key]) 
 			this.coef_x = this.width / (this.core.data[key].timeMax - this.core.data[key].timeMin);
 			
@@ -97,6 +105,7 @@ JsCHRIST_Graph.prototype =
 		
 		var c = this.canvasGraph;
 		
+		// Récupération des valeurs (performances)
 		var x_i = this.x_i[key];
 		var y_i = this.y_i[key];
 
@@ -105,14 +114,15 @@ JsCHRIST_Graph.prototype =
 
 		this.setLadderCoeff(key);
 
-
+		// Si l'on ne passe pas les données ou que l'échelle a changée, il faut
+		// tout redessiner
 		if (data == undefined || this.coef_y != coef_y)
 		{
 			fullPaint = true;
 			coef_x = this.coef_x;
 			coef_y = this.coef_y;
 		}
-		else
+		else // Sinon, on garde l'ancienne échelle
 		{
 			this.coef_x = coef_x;
 			this.coef_y = coef_y;
@@ -121,7 +131,10 @@ JsCHRIST_Graph.prototype =
 
 		if (fullPaint)
 		{
+			// Si on dessine tout, il faut récupérer toutes les données
 			data = this.core.data[key].data;
+
+			// On efface toute l'ancienne zone
 			c.clearRect(0,0, this.width, this.height);
 			x_i = 0;
 			y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
@@ -137,10 +150,12 @@ JsCHRIST_Graph.prototype =
 
 		c.moveTo(x_i,y_i);
 
+		// Pour chaque point à afficher
 		for (var i = 0; i < data.length; ++i)
 		{
 
 			var tmp_x = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
+			// Si la position dépasse, il faut tout décaler
 			if (tmp_x > this.width)
 			{	
 				var incr = tmp_x - x_i;
@@ -167,6 +182,7 @@ JsCHRIST_Graph.prototype =
 		this.y_i[key] = y_i;
 	},
 
+	// Décalage du graphe en prenant les pixels du canvas
 	decalerGraph: function(decalage)
 	{
 		var c = this.canvasGraph;
