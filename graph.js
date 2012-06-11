@@ -16,7 +16,11 @@ JsCHRIST_Graph = function(core, screen)
 	// Optimisations temporaires
 	this.x_i = {};
 	this.y_i = {};
-
+	
+	//coefficients pour l'echelle
+	this.coef_x = {};
+	this.coef_y = {};
+	
 	// Position de la souris
 	this.mousePos = 0;
 	this.paintedMousePose = -1;
@@ -88,23 +92,41 @@ JsCHRIST_Graph.prototype =
 
 		this.paintedMousePose = this.mousePos;
 	},
-
+	
+	setLadderCoeff: function(key)
+	{
+		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
+		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
+		// TODO date parse
+		if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
+			this.coef_x[key] = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+			
+		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
+			this.coef_y[key] = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+	},
+	
 	paintGraph: function(fullPaint, data)
 	{
 		//log(this.core.data);
-	console.log("Paint");
 		var colors = ['blue', 'purple', 'red', 'yellowgreen'];
 		for(var key in this.core.data)
 		{
+			this.setLadderCoeff(key);
+			
 			var c = this.canvasGraph;
 			
 			var x_i = this.x_i[key];
 			var y_i = this.y_i[key];
 
+			var coef_x = this.coef_x[key]; 
+			var coef_y = this.coef_y[key]; 
+
 			if (x_i == undefined) x_i = 0;
 			if (y_i == undefined) y_i = this.height-data[0].data;
 
 			var debut = 0;
+
+			fullPaint = true;
 
 			if (fullPaint)
 			{
@@ -112,10 +134,11 @@ JsCHRIST_Graph.prototype =
 				c.clearRect(0,0, this.width, this.height);
 				x_i = 0; //(this.core.data[key].data.length - data.length)*3;
 				//this.y_i = 0;
-				y_i = this.height-data[0].data;
+				//y_i = this.height-data[0].data;
+				y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
 
-				if (data.length * 3 > this.width)
-					debut = data.length - this.width / 3; 
+				/*if (data.length * 3 > this.width)
+					debut = data.length - this.width / 3; */
 			}
 			else if (data == undefined)
 			{
@@ -131,7 +154,8 @@ JsCHRIST_Graph.prototype =
 				{*/
 				//}
 			//}
-
+			
+			
 			c.beginPath();
 			c.strokeStyle = colors.pop();
 			c.lineWidth = 2;
@@ -139,20 +163,25 @@ JsCHRIST_Graph.prototype =
 			c.shadowColor = "black";
 			c.shadowOffsetX = 1;
 			c.shadowOffsetY = 1;*/
+
 			c.moveTo(x_i,y_i);
 
 			for (var i = debut; i < data.length-debut; ++i)
 			{
-				x_i += 3;
 
-				if (x_i > this.width)
+				var x_i = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
+
+				//console.log(x_i);
+				//x_i += incr;
+
+				/*if (x_i > this.width)
 				{
-					this.decalerGraph(3);
+					this.decalerGraph(incr);
 					c.moveTo(x_i-6,y_i);
-					x_i -= 3;
-				}
-
-				y_i = this.height-data[i].data;
+					x_i -= incr;
+				}*/
+				//y_i = this.height-data[i].data;
+				y_i = this.height - ((data[i].data - this.core.data[key].dataMin) * coef_y);
 				c.lineTo(x_i, y_i);
 			}
 

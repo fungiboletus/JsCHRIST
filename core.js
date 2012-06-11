@@ -48,11 +48,13 @@ JsCHRIST.prototype =
 			$.ajax({
 				url: "../app/RestJson/data_dt/"+encodeURIComponent(nom),
 				success: function(json) {
+					var start_t = Date.parse(json.start_t);
+					var date = new Date(start_t);
 					var data  = {
-						timeMin: undefined,
-						timeMax: undefined,
-						dataMin: undefined,
-						dataMax: undefined,
+						timeMin: date,
+						timeMax: date,
+						dataMin: json.data[0].rythme,
+						dataMax: json.data[0].rythme,
 						data: []
 					};
 
@@ -65,7 +67,8 @@ JsCHRIST.prototype =
 					var i = 0;
 
 					var intervale = window.setInterval(function(){
-						var tuple = {time_t: new Date(start_t+json.data[i].dt), data: json.data[i].rythme};
+						start_t += json.data[i].dt;
+						var tuple = {time_t: new Date(start_t), data: json.data[i].rythme};
 						obj.addTuple(data, tuple); 
 
 						$(obj).trigger("jschrist.new_tuples", {
@@ -110,7 +113,7 @@ JsCHRIST.prototype =
 		if (tuple.time_t < data.timeMin) data.timeMin = tuple.time_t;
 		if (tuple.time_t > data.timeMax) data.timeMax = tuple.time_t;
 		if (tuple.data < data.dataMin) data.dataMin = tuple.data;
-		if (tuple.data > data.dataMax) data.dataMin = tuple.data;
+		if (tuple.data > data.dataMax) data.dataMax = tuple.data;
 
 		data.data.push(tuple);
 	}
