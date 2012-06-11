@@ -13,6 +13,11 @@ JsCHRIST_Graph = function(core, screen)
 	this.screen.appendChild(this.screenLine);
 	this.canvasLine = this.screenLine.getContext('2d');
 	
+	this.screenAxes = newDom('canvas');
+	this.screenAxes.id = "screenAxes";
+	this.screen.appendChild(this.screenAxes);
+	this.canvasAxes = this.screenAxes.getContext('2d');
+	
 	// Optimisations temporaires
 	this.x_i = {};
 	this.y_i = {};
@@ -38,8 +43,8 @@ JsCHRIST_Graph = function(core, screen)
 		obj.mousePos = e.offsetX;
 		obj.paintLine();
 		
-		//FIXME
-		obj.getPointedValue();
+		//FIXME trouver la key... ^^
+		obj.getPointedValue('<3');
 		
 		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
@@ -100,11 +105,36 @@ JsCHRIST_Graph.prototype =
 		this.paintedMousePose = this.mousePos;
 	},
 	
-	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
-	getPointedValue: function(){
-		var data = this.core.data['<3'].data; //TODO
+	drawAxes: function(key)
+	{
+		//init canvas
+		var c = this.canvasAxes;
 		
-		var value_x = (this.mousePos / this.coef_x['<3']) + Date.parse(this.core.data['<3'].timeMin); //TODO
+		c.clearRect(0,0, this.width, this.height);
+		
+		c.beginPath();
+		c.strokeStyle = "white";
+		c.lineWidth = 2;
+		
+		//trouver la hauteur de l'axe des abscisses
+		var height_x = 0;
+		if(this.core.data[key].dataMin < 0){
+			height_x = (0 - this.core.data[key].dataMin)* this.coef_x[key];
+		}
+		
+		//dessine la ligne de l'axe des abscisses
+		c.moveTo(0, this.height - height_x);
+		c.lineTo(this.width, this.height - height_x);
+		
+		c.stroke();
+		c.closePath();
+	},
+	
+	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
+	getPointedValue: function(key){
+		var data = this.core.data[key].data; //TODO
+		
+		var value_x = (this.mousePos / this.coef_x[key]) + Date.parse(this.core.data[key].timeMin);
 		var value_y = 0;
 		
 		//TODO recherche dichotomique du temps correspondant:
@@ -127,7 +157,7 @@ JsCHRIST_Graph.prototype =
 		this.pointedTime = data[first].time_t;
 		*/
 		
-		for(var i = 0 ; i < data.length ; i++){
+		for(var i = 0 ; i < data.length-1 ; i++){
 			if(Date.parse(data[i].time_t) >= value_x){
 				value_y = data[i].data;
 				break;
@@ -177,9 +207,7 @@ JsCHRIST_Graph.prototype =
 			{
 				data = this.core.data[key].data;
 				c.clearRect(0,0, this.width, this.height);
-				x_i = 0; //(this.core.data[key].data.length - data.length)*3;
-				//this.y_i = 0;
-				//y_i = this.height-data[0].data;
+				x_i = 0;
 				y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
 
 				/*if (data.length * 3 > this.width)
@@ -189,43 +217,17 @@ JsCHRIST_Graph.prototype =
 			{
 				data = this.core.data[key].data;
 			}
-
-				/*if (this.core.data.length > 0)
-				{
-					this.i = 1;
-					this.y_i = this.height-this.core.data[0].data;
-				}
-				else
-				{*/
-				//}
-			//}
-			
 			
 			c.beginPath();
 			c.strokeStyle = colors.pop();
 			c.lineWidth = 2;
-			/*c.shadowBlur = 3;
-			c.shadowColor = "black";
-			c.shadowOffsetX = 1;
-			c.shadowOffsetY = 1;*/
 
 			c.moveTo(x_i,y_i);
 
 			for (var i = debut; i < data.length-debut; ++i)
 			{
-
 				var x_i = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
 
-				//console.log(x_i);
-				//x_i += incr;
-
-				/*if (x_i > this.width)
-				{
-					this.decalerGraph(incr);
-					c.moveTo(x_i-6,y_i);
-					x_i -= incr;
-				}*/
-				//y_i = this.height-data[i].data;
 				y_i = this.height - ((data[i].data - this.core.data[key].dataMin) * coef_y);
 				c.lineTo(x_i, y_i);
 			}
@@ -237,6 +239,9 @@ JsCHRIST_Graph.prototype =
 			
 			this.x_i[key] = x_i;
 			this.y_i[key] = y_i;
+			
+			//actualise les axes...
+			this.drawAxes(key);
 		}
 	},
 
