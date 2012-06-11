@@ -24,6 +24,10 @@ JsCHRIST_Graph = function(core, screen)
 	// Position de la souris
 	this.mousePos = 0;
 	this.paintedMousePose = -1;
+	
+	//valeur pointée :
+	this.pointedValue = 0;
+	this.pointedTime = 0;
 
 	// Gestion de la taille de la zone
 	this.manageSize();
@@ -33,8 +37,11 @@ JsCHRIST_Graph = function(core, screen)
 	$(this.screen).mousemove(function(e) {
 		obj.mousePos = e.offsetX;
 		obj.paintLine();
-
-		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.mousePos});
+		
+		//FIXME
+		obj.getPointedValue();
+		
+		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
 
 	$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
@@ -93,13 +100,51 @@ JsCHRIST_Graph.prototype =
 		this.paintedMousePose = this.mousePos;
 	},
 	
+	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
+	getPointedValue: function(){
+		var data = this.core.data['<3'].data; //TODO
+		
+		var value_x = (this.mousePos / this.coef_x['<3']) + Date.parse(this.core.data['<3'].timeMin); //TODO
+		var value_y = 0;
+		
+		//TODO recherche dichotomique du temps correspondant:
+		/*var first = 0;
+		var last = data.length-1;
+		var middle = 0;
+		while(first < last){
+			middle = Math.floor((last - first) / 2);
+			if(Date.parse(data[middle].time_t) > value_x){
+				first = middle + 1;
+			}
+			else{
+				last = middle - 1;
+			}
+		}
+		log("coucou");
+		
+		this.pointedValue = data[first].data;
+		log(this.pointedValue);
+		this.pointedTime = data[first].time_t;
+		*/
+		
+		for(var i = 0 ; i < data.length ; i++){
+			if(Date.parse(data[i].time_t) >= value_x){
+				value_y = data[i].data;
+				break;
+			}
+		}
+		
+		this.pointedValue = value_y;
+		log(value_y);
+		this.pointedTime = data[i].time_t;
+	},
+	
 	setLadderCoeff: function(key)
 	{
 		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
 		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
-		// TODO date parse
 		if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
-			this.coef_x[key] = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+			this.coef_x[key] = this.width / (this.core.data[key].timeMax - this.core.data[key].timeMin);
 			
 		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
 			this.coef_y[key] = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
