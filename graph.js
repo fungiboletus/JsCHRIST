@@ -84,8 +84,8 @@ JsCHRIST_Graph.prototype =
 		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
 		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
 		// TODO date parse
-		if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
-			this.coef_x = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+		if(this.core.data[key].timeMax != this.core.data[key]) 
+			this.coef_x = this.width / (this.core.data[key].timeMax - this.core.data[key].timeMin);
 			
 		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
 			this.coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
@@ -93,7 +93,6 @@ JsCHRIST_Graph.prototype =
 	
 	paintGraph: function(fullPaint, key, data)
 	{
-		//log(this.core.data);
 		var colors = ['blue', 'purple', 'red', 'yellowgreen'];
 		
 		var c = this.canvasGraph;
@@ -119,24 +118,13 @@ JsCHRIST_Graph.prototype =
 			this.coef_y = coef_y;
 		}
 
-		/*if (x_i == undefined) x_i = 0;
-		if (y_i == undefined) y_i = this.height-data[0].data;*/
-		/*console.log(fullPaint);
-		var debut = 0;*/
-
-		//fullPaint = true;
 
 		if (fullPaint)
 		{
 			data = this.core.data[key].data;
 			c.clearRect(0,0, this.width, this.height);
-			x_i = 0; //(this.core.data[key].data.length - data.length)*3;
-			//this.y_i = 0;
-			//y_i = this.height-data[0].data;
+			x_i = 0;
 			y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
-
-			/*if (data.length * 3 > this.width)
-				debut = data.length - this.width / 3; */
 		}
 		
 		c.beginPath();
@@ -156,7 +144,6 @@ JsCHRIST_Graph.prototype =
 			if (tmp_x > this.width)
 			{	
 				var incr = tmp_x - x_i;
-				//log(x_i);
 				this.decalerGraph(incr);
 				x_i = tmp_x;
 				c.moveTo(this.width - incr,y_i);
@@ -186,7 +173,6 @@ JsCHRIST_Graph.prototype =
 		var imgData = c.getImageData(0,0,this.width, this.height);
 
 		c.clearRect(this.width-decalage,0, decalage, this.height);
-		//c.clearRect(0,0, this.width, this.height);
 		c.putImageData(imgData, -decalage, 0);
 	}
 }
