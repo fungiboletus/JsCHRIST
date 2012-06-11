@@ -65,15 +65,28 @@ JsCHRIST.prototype =
 					var start_t = Date.parse(json.start_t);
 
 					var i = 0;
-
-					var intervale = window.setInterval(function(){
+					
+					var _addTuple = function(i)
+					{
 						start_t += json.data[i].dt;
 						var tuple = {time_t: new Date(start_t), data: json.data[i].rythme};
-						obj.addTuple(data, tuple); 
+						obj.addTuple(data, tuple);
+						return tuple;
+					}
+
+					for (; i < 30; ++i)
+						_addTuple(i);
+
+					$(obj).trigger("jschrist.new_tuples", {
+						statement_name: nom,
+						data: data.data
+					});
+
+					var intervale = window.setInterval(function(){
 
 						$(obj).trigger("jschrist.new_tuples", {
 							statement_name: nom,
-							data: [tuple]
+							data: [_addTuple(i)]
 						});
 
 						if (++i == json.data.length)
@@ -98,7 +111,6 @@ JsCHRIST.prototype =
 					li.appendChild(document.createTextNode(report));
 					li.onclick = clic_releve;
 					list.append(li);
-					log(report);
 				}
 			},
 			error: function(e) {

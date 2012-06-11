@@ -18,8 +18,8 @@ JsCHRIST_Graph = function(core, screen)
 	this.y_i = {};
 	
 	//coefficients pour l'echelle
-	this.coef_x = {};
-	this.coef_y = {};
+	this.coef_x = undefined;
+	this.coef_y = undefined;
 	
 	// Position de la souris
 	this.mousePos = 0;
@@ -37,25 +37,11 @@ JsCHRIST_Graph = function(core, screen)
 		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.mousePos});
 	});
 
-	$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
+	//$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
 	$(core).bind("jschrist.new_tuples", function(a, b)
 	{
-		obj.paintGraph(false, b.data);
+		obj.paintGraph(false, b.statement_name, b.data);
 	});
-	/*intervalle = window.setInterval((function(self) {
-		return function() {
-			self.addTuple({time_t: new Date(), data: randInt(-128, 128)});
-
-			if (self.data.length > 256)
-			{
-				self.data = self.data.slice(1);
-				//self.data = self.data.slice(128);
-				self.paintGraph(true);
-			} else {
-				self.paintGraph(false);
-			}
-
-		}})(this), 42);*/
 
 }
 
@@ -72,7 +58,7 @@ JsCHRIST_Graph.prototype =
 		obj.screenLine.width = obj.width;
 		obj.screenLine.height = obj.height;
 		
-		obj.paintGraph(true);
+		//obj.paintGraph(true);
 	},
 
 	paintLine: function(fullPaint)
@@ -99,100 +85,99 @@ JsCHRIST_Graph.prototype =
 		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
 		// TODO date parse
 		if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
-			this.coef_x[key] = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+			this.coef_x = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
 			
 		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
-			this.coef_y[key] = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+			this.coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
 	},
 	
-	paintGraph: function(fullPaint, data)
+	paintGraph: function(fullPaint, key, data)
 	{
 		//log(this.core.data);
 		var colors = ['blue', 'purple', 'red', 'yellowgreen'];
-		for(var key in this.core.data)
+		
+		var c = this.canvasGraph;
+		
+		var x_i = this.x_i[key];
+		var y_i = this.y_i[key];
+
+		var coef_x = this.coef_x;
+		var coef_y = this.coef_y;
+
+		this.setLadderCoeff(key);
+
+
+		if (data == undefined || this.coef_y != coef_y)
 		{
-			this.setLadderCoeff(key);
-			
-			var c = this.canvasGraph;
-			
-			var x_i = this.x_i[key];
-			var y_i = this.y_i[key];
-
-			var coef_x = this.coef_x[key]; 
-			var coef_y = this.coef_y[key]; 
-
-			if (x_i == undefined) x_i = 0;
-			if (y_i == undefined) y_i = this.height-data[0].data;
-
-			var debut = 0;
-
 			fullPaint = true;
-
-			if (fullPaint)
-			{
-				data = this.core.data[key].data;
-				c.clearRect(0,0, this.width, this.height);
-				x_i = 0; //(this.core.data[key].data.length - data.length)*3;
-				//this.y_i = 0;
-				//y_i = this.height-data[0].data;
-				y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
-
-				/*if (data.length * 3 > this.width)
-					debut = data.length - this.width / 3; */
-			}
-			else if (data == undefined)
-			{
-				data = this.core.data[key].data;
-			}
-
-				/*if (this.core.data.length > 0)
-				{
-					this.i = 1;
-					this.y_i = this.height-this.core.data[0].data;
-				}
-				else
-				{*/
-				//}
-			//}
-			
-			
-			c.beginPath();
-			c.strokeStyle = colors.pop();
-			c.lineWidth = 2;
-			/*c.shadowBlur = 3;
-			c.shadowColor = "black";
-			c.shadowOffsetX = 1;
-			c.shadowOffsetY = 1;*/
-
-			c.moveTo(x_i,y_i);
-
-			for (var i = debut; i < data.length-debut; ++i)
-			{
-
-				var x_i = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
-
-				//console.log(x_i);
-				//x_i += incr;
-
-				/*if (x_i > this.width)
-				{
-					this.decalerGraph(incr);
-					c.moveTo(x_i-6,y_i);
-					x_i -= incr;
-				}*/
-				//y_i = this.height-data[i].data;
-				y_i = this.height - ((data[i].data - this.core.data[key].dataMin) * coef_y);
-				c.lineTo(x_i, y_i);
-			}
-
-			c.stroke();
-			c.closePath();
-
-			fullPaint = false;
-			
-			this.x_i[key] = x_i;
-			this.y_i[key] = y_i;
+			coef_x = this.coef_x;
+			coef_y = this.coef_y;
 		}
+		else
+		{
+			this.coef_x = coef_x;
+			this.coef_y = coef_y;
+		}
+
+		/*if (x_i == undefined) x_i = 0;
+		if (y_i == undefined) y_i = this.height-data[0].data;*/
+		/*console.log(fullPaint);
+		var debut = 0;*/
+
+		//fullPaint = true;
+
+		if (fullPaint)
+		{
+			data = this.core.data[key].data;
+			c.clearRect(0,0, this.width, this.height);
+			x_i = 0; //(this.core.data[key].data.length - data.length)*3;
+			//this.y_i = 0;
+			//y_i = this.height-data[0].data;
+			y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
+
+			/*if (data.length * 3 > this.width)
+				debut = data.length - this.width / 3; */
+		}
+		
+		c.beginPath();
+		c.strokeStyle = colors.pop();
+		c.lineWidth = 2;
+		/*c.shadowBlur = 3;
+		c.shadowColor = "black";
+		c.shadowOffsetX = 1;
+		c.shadowOffsetY = 1;*/
+
+		c.moveTo(x_i,y_i);
+
+		for (var i = 0; i < data.length; ++i)
+		{
+
+			var tmp_x = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
+			if (tmp_x > this.width)
+			{	
+				var incr = tmp_x - x_i;
+				//log(x_i);
+				this.decalerGraph(incr);
+				x_i = tmp_x;
+				c.moveTo(this.width - incr,y_i);
+				tmp_x = this.width;
+			}
+			else
+			{
+				x_i = tmp_x;
+			}
+			
+			y_i = this.height - ((data[i].data - this.core.data[key].dataMin) * coef_y);
+			c.lineTo(tmp_x, y_i);
+		}
+
+		c.stroke();
+		c.closePath();
+
+		fullPaint = false;
+		
+		this.x_i[key] = x_i;
+		this.y_i[key] = y_i;
 	},
 
 	decalerGraph: function(decalage)
