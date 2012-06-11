@@ -46,7 +46,9 @@ JsCHRIST_Graph = function(core, screen)
 	//$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
 	$(core).bind("jschrist.new_tuples", function(a, b)
 	{
-		obj.paintGraph(false, b.statement_name, b.data);
+		for (var elem in b.data[0])
+			if (elem != 'time_t')
+				obj.paintGraph(false, b.statement_name, elem, b.data);
 	});
 
 }
@@ -88,18 +90,21 @@ JsCHRIST_Graph.prototype =
 		this.paintedMousePose = this.mousePos;
 	},
 	
-	setLadderCoeff: function(key)
+	setLadderCoeff: function(key, elem)
 	{
+		var elemMin = elem+'Min';
+		var elemMax = elem+'Max';
+		
 		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
 		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
-		if(this.core.data[key].timeMax != this.core.data[key]) 
-			this.coef_x = this.width / (this.core.data[key].timeMax - this.core.data[key].timeMin);
+		if(this.core.data[key].time_tMax != this.core.data[key].time_tMin) 
+			this.coef_x = this.width / (this.core.data[key].time_tMax - this.core.data[key].time_tMin);
 			
-		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
-			this.coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+		if(this.core.data[key][elemMax] != this.core.data[key][elemMin]) 
+			this.coef_y = this.height / (this.core.data[key][elemMax] - this.core.data[key][elemMin]);
 	},
 	
-	paintGraph: function(fullPaint, key, data)
+	paintGraph: function(fullPaint, key, elem, data)
 	{
 		var colors = ['blue', 'purple', 'red', 'yellowgreen'];
 		
@@ -112,7 +117,7 @@ JsCHRIST_Graph.prototype =
 		var coef_x = this.coef_x;
 		var coef_y = this.coef_y;
 
-		this.setLadderCoeff(key);
+		this.setLadderCoeff(key, elem);
 
 		// Si l'on ne passe pas les données ou que l'échelle a changée, il faut
 		// tout redessiner
@@ -128,6 +133,7 @@ JsCHRIST_Graph.prototype =
 			this.coef_y = coef_y;
 		}
 
+		var elemMin = elem+'Min';
 
 		if (fullPaint)
 		{
@@ -137,7 +143,7 @@ JsCHRIST_Graph.prototype =
 			// On efface toute l'ancienne zone
 			c.clearRect(0,0, this.width, this.height);
 			x_i = 0;
-			y_i = this.height - ((data[0].data - this.core.data[key].dataMin) * coef_y);
+			y_i = this.height - ((data[0][elem] - this.core.data[key][elemMin]) * coef_y);
 		}
 		
 		c.beginPath();
@@ -154,7 +160,7 @@ JsCHRIST_Graph.prototype =
 		for (var i = 0; i < data.length; ++i)
 		{
 
-			var tmp_x = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
+			var tmp_x = (Date.parse(data[i].time_t) - Date.parse(this.core.data[key].time_tMin))* coef_x;
 			// Si la position dépasse, il faut tout décaler
 			if (tmp_x > this.width)
 			{	
@@ -169,7 +175,7 @@ JsCHRIST_Graph.prototype =
 				x_i = tmp_x;
 			}
 			
-			y_i = this.height - ((data[i].data - this.core.data[key].dataMin) * coef_y);
+			y_i = this.height - ((data[i][elem] - this.core.data[key][elemMin]) * coef_y);
 			c.lineTo(tmp_x, y_i);
 		}
 
