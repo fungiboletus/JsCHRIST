@@ -17,7 +17,11 @@ JsCHRIST_Graph = function(core, screen)
 	this.i = 0;
 	this.x_i = 0;
 	this.y_i = 0;
-
+	
+	//coefficients pour l'echelle
+	this.coef_x = 1;
+	this.coef_y = 1;
+	
 	// Position de la souris
 	this.mousePos = 0;
 	this.paintedMousePose = -1;
@@ -89,7 +93,18 @@ JsCHRIST_Graph.prototype =
 
 		this.paintedMousePose = this.mousePos;
 	},
-
+	
+	setLadderCoeff: function(key)
+	{
+		//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
+		//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
+		if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
+			this.coef_x = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
+			
+		if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
+			this.coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+	},
+	
 	paintGraph: function(fullPaint)
 	{
 		//log(this.core.data);
@@ -120,13 +135,7 @@ JsCHRIST_Graph.prototype =
 				//}
 			//}
 			
-			//calcul des coefficients à affecter aux valeurs pour faire correspondre pixels et valeur.
-			//coeffiecients permettant de représenter les données proportionnellement à la fenetre d'affichage.
-			if(Date.parse(this.core.data[key].timeMax) != Date.parse(this.core.data[key].timeMin)) 
-				var coef_x = this.width / (Date.parse(this.core.data[key].timeMax) - Date.parse(this.core.data[key].timeMin));
-				
-			if(this.core.data[key].dataMax != this.core.data[key].dataMin) 
-				var coef_y = this.height / (this.core.data[key].dataMax - this.core.data[key].dataMin);
+			this.setLadderCoeff(key);
 			
 			c.beginPath();
 			c.strokeStyle = colors.pop();
@@ -139,8 +148,8 @@ JsCHRIST_Graph.prototype =
 			
 			for (; this.i < data.length; ++this.i)
 			{
-				this.x_i = (Date.parse(data[this.i].time_t) - Date.parse(this.core.data[key].timeMin))* coef_x;
-				this.y_i = this.height - ((data[this.i].data - this.core.data[key].dataMin) * coef_y);
+				this.x_i = (Date.parse(data[this.i].time_t) - Date.parse(this.core.data[key].timeMin))* this.coef_x;
+				this.y_i = this.height - ((data[this.i].data - this.core.data[key].dataMin) * this.coef_y);
 				
 				c.lineTo(this.x_i, this.y_i);
 			}
