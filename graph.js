@@ -52,13 +52,11 @@ var JsCHRIST_Graph = function(core, screen)
 		obj.mousePos = e.offsetX;
 		obj.paintLine();
 		
-		//FIXME trouver la key... ^^
 		for (var d in obj.core.data)
 		{
 			obj.getPointedValue(d);
 			break;
 		}
-		
 	});
 
 	//$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
