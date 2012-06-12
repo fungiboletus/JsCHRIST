@@ -112,7 +112,7 @@ JsCHRIST_Graph.prototype =
 	drawAxes: function(key)
 	{
 		//init canvas
-		var c = this.canvasAxes;
+		/*var c = this.canvasAxes;
 		c.clearRect(0,0, this.width, this.height);
 		
 		c.beginPath();
@@ -145,14 +145,14 @@ JsCHRIST_Graph.prototype =
 		}
 		/*while(npx_y < min_px){
 			npx_y++;
-		}*/
+		}
 		
 		//trace les graduations en x
 		
 		//trace les graduations en y
 		
 		c.stroke();
-		c.closePath();
+		c.closePath();*/
 	},
 	
 	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
@@ -163,29 +163,27 @@ JsCHRIST_Graph.prototype =
 	
 		var value_x = ((this.decalage_x[key] + this.mousePos) / this.coef_x) + Date.parse(this.core.data[key].time_tMin);
 
-		var value_y = 0;
+		//var value_y = 0;
 		
 		//TODO recherche dichotomique du temps correspondant:
-		/*var first = 0;
+		var first = 0;
 		var last = data.length-1;
 		var middle = 0;
-		var i = 0;
 		while(first < last){
-			middle = Math.floor((last - first) / 2) + first;
-			log(middle);
-			if(Date.parse(data[middle].time_t) > value_x){
+			middle = Math.floor((last + first) / 2);
+			//log(middle);
+			if(Date.parse(data[middle].time_t) < value_x){
 				first = middle + 1;
 			}
 			else{
 				last = middle - 1;
 			}
-			if (++i == 50) break;
 		}
 		
 		this.pointedValue = data[first].data;
-		log(this.pointedValue);
-		this.pointedTime = data[first].time_t;*/
-		
+		//log(this.pointedValue);
+		this.pointedTime = data[first].time_t;
+		/*
 		for(var i = 0 ; i < data.length-1 ; i++){
 			if(Date.parse(data[i].time_t) >= value_x){
 				value_y = data[i].data;
@@ -195,7 +193,7 @@ JsCHRIST_Graph.prototype =
 		
 		this.pointedValue = value_y;
 		//log(value_y);
-		this.pointedTime = data[i].time_t;
+		this.pointedTime = data[i].time_t;*/
 	},
 	
 	setLadderCoeff: function(key, elem)
