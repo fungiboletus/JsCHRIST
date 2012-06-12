@@ -59,7 +59,6 @@ var JsCHRIST_Graph = function(core, screen)
 			break;
 		}
 		
-		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
 
 	//$(core).bind("jschrist.add_statement", function(a, b) { log(b);});

@@ -29,8 +29,6 @@ var JsCHRIST_Table = function(core, screen)
 		for (var i = 0; i < b.data.length; ++i)
 			obj.addRow(b.data[i]);
 	});
-
-	$(this.div_table).find('tr').mouseover(log);
 }
 
 JsCHRIST_Table.prototype =
@@ -48,6 +46,13 @@ JsCHRIST_Table.prototype =
 	addRow: function(tuple)
 	{
 		var tr = newDom('tr');
+
+		var obj = this;
+		tr.onmouseover = function(e)
+		{
+			$(obj.core).trigger("jschrist.time_sync", {time_t: tuple.time_t});
+		}
+
 		for (var key in tuple)
 		{
 			var td = newDom('td');
