@@ -110,9 +110,28 @@ JsCHRIST_Graph.prototype =
 		this.paintedMousePose = this.mousePos;
 	},
 	
-	drawMiliGrid : function()
+	drawGrid : function(margin_x, margin_y, step_x, step_y)
 	{
-		log("pas encore fait : TODO");
+		var c = this.canvasAxes;
+		
+		c.beginPath();
+		c.strokeStyle = "white";
+		c.lineWidth = 0.5;
+		
+		//trace les lignes verticales de la grille
+		for(var i = margin_y + step_x ; i < this.width ; i += step_x){
+			c.moveTo(i , this.height - margin_x);
+			c.lineTo(i, 0);
+		}
+		
+		//trace les lignes horizontales de la grille
+		for(var i = this.height - margin_x - step_y ; i > 0 ; i -= step_y){
+			c.moveTo(margin_x, i);
+			c.lineTo(this.width, i);
+		}
+		
+		c.stroke();
+		c.closePath();
 	},
 	
 	/**
@@ -120,8 +139,9 @@ JsCHRIST_Graph.prototype =
 	* margin_y = decalage de l'axe des ordonnées vers la droite de la boite
 	* step_x = espacement en pixels entre chaque graduation de l'axe des abscisses
 	* step_y = espacement en pixels entre chaque graduation de l'axe des ordonnées
+	* miligrid = booleen décidant si on trace un papier milimetré ou non...
 	*/
-	drawAxes: function(margin_x, margin_y, step_x, step_y)
+	drawAxes: function(margin_x, margin_y, step_x, step_y, grid)
 	{
 		//init canvas
 		var c = this.canvasAxes;
@@ -129,7 +149,7 @@ JsCHRIST_Graph.prototype =
 		
 		c.beginPath();
 		c.strokeStyle = "white";
-		c.lineWidth = 2;
+		c.lineWidth = 1;
 		
 		//dessine la ligne de l'axe des abscisses
 		c.moveTo(0, this.height - margin_x);
@@ -153,6 +173,10 @@ JsCHRIST_Graph.prototype =
 		
 		c.stroke();
 		c.closePath();
+		
+		if(grid){
+			this.drawGrid(margin_x, margin_y, step_x, step_y);
+		}
 	},
 	
 	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
@@ -274,7 +298,7 @@ JsCHRIST_Graph.prototype =
 			this.y_i[key] = y_i;
 			
 			//actualise les axes...
-			this.drawAxes(30, 30, 80, 50);
+			this.drawAxes(5, 5, 80, 50, true);
 		}
 
 		c.stroke();
