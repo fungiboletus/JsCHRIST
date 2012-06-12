@@ -18,9 +18,17 @@ var JsCHRIST_Graph = function(core, screen)
 	this.screen.appendChild(this.screenLine);
 	this.canvasLine = this.screenLine.getContext('2d');
 	
+	this.screenAxes = newDom('canvas');
+	this.screenAxes.id = "screenAxes";
+	this.screen.appendChild(this.screenAxes);
+	this.canvasAxes = this.screenAxes.getContext('2d');
+	
 	// Dernières positions des points tracés
 	this.x_i = {};
 	this.y_i = {};
+
+	// Décalage global
+	this.decalage_x = {};
 	
 	// Coefficients pour l'echelle
 	this.coef_x = undefined;
@@ -29,6 +37,10 @@ var JsCHRIST_Graph = function(core, screen)
 	// Position de la souris
 	this.mousePos = 0;
 	this.paintedMousePose = -1;
+	
+	//valeur pointée :
+	this.pointedValue = 0;
+	this.pointedTime = 0;
 
 	// Gestion de la taille de la zone
 	this.manageSize();
@@ -39,8 +51,15 @@ var JsCHRIST_Graph = function(core, screen)
 	$(this.screen).mousemove(function(e) {
 		obj.mousePos = e.offsetX;
 		obj.paintLine();
-
-		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.mousePos});
+		
+		//FIXME trouver la key... ^^
+		for (var d in obj.core.data)
+		{
+			obj.getPointedValue(d);
+			break;
+		}
+		
+		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
 
 	//$(core).bind("jschrist.add_statement", function(a, b) { log(b);});
@@ -88,6 +107,75 @@ JsCHRIST_Graph.prototype =
 		c.closePath();
 
 		this.paintedMousePose = this.mousePos;
+	},
+	
+	drawAxes: function(key)
+	{
+		//init canvas
+		var c = this.canvasAxes;
+		
+		c.clearRect(0,0, this.width, this.height);
+		
+		c.beginPath();
+		c.strokeStyle = "white";
+		c.lineWidth = 2;
+		
+		//trouver la hauteur de l'axe des abscisses
+		var height_x = 0;
+		if(this.core.data[key].dataMin < 0){
+			height_x = (0 - this.core.data[key].dataMin)* this.coef_x;
+		}
+		
+		//dessine la ligne de l'axe des abscisses
+		c.moveTo(0, this.height - height_x);
+		c.lineTo(this.width, this.height - height_x);
+		
+		c.stroke();
+		c.closePath();
+	},
+	
+	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
+	getPointedValue: function(key){
+		var data = this.core.data[key].data; //TODO
+
+		if (this.decalage_x[key] == undefined) this.decalage_x[key] = 0.0;
+	
+		var value_x = ((this.decalage_x[key] + this.mousePos) / this.coef_x) + Date.parse(this.core.data[key].time_tMin);
+
+		var value_y = 0;
+		
+		//TODO recherche dichotomique du temps correspondant:
+		/*var first = 0;
+		var last = data.length-1;
+		var middle = 0;
+		var i = 0;
+		while(first < last){
+			middle = Math.floor((last - first) / 2) + first;
+			log(middle);
+			if(Date.parse(data[middle].time_t) > value_x){
+				first = middle + 1;
+			}
+			else{
+				last = middle - 1;
+			}
+			if (++i == 50) break;
+		}
+		log("coucou");
+		
+		this.pointedValue = data[first].data;
+		log(this.pointedValue);
+		this.pointedTime = data[first].time_t;*/
+		
+		for(var i = 0 ; i < data.length-1 ; i++){
+			if(Date.parse(data[i].time_t) >= value_x){
+				value_y = data[i].data;
+				break;
+			}
+		}
+		
+		this.pointedValue = value_y;
+		//log(value_y);
+		this.pointedTime = data[i].time_t;
 	},
 	
 	setLadderCoeff: function(key, elem)
@@ -165,7 +253,7 @@ JsCHRIST_Graph.prototype =
 			if (tmp_x > this.width)
 			{	
 				var incr = tmp_x - x_i;
-				this.decalerGraph(incr);
+				this.decalerGraph(key, incr);
 				x_i = tmp_x;
 				c.moveTo(this.width - incr,y_i);
 				tmp_x = this.width;
@@ -177,6 +265,12 @@ JsCHRIST_Graph.prototype =
 			
 			y_i = this.height - ((data[i][elem] - this.core.data[key][elemMin]) * coef_y);
 			c.lineTo(tmp_x, y_i);
+			
+			this.x_i[key] = x_i;
+			this.y_i[key] = y_i;
+			
+			//actualise les axes...
+			this.drawAxes(key);
 		}
 
 		c.stroke();
@@ -189,8 +283,11 @@ JsCHRIST_Graph.prototype =
 	},
 
 	// Décalage du graphe en prenant les pixels du canvas
-	decalerGraph: function(decalage)
+	decalerGraph: function(key, decalage)
 	{
+		if (this.decalage_x[key] == undefined) this.decalage_x[key] = decalage;
+		else this.decalage_x[key] += decalage;
+
 		var c = this.canvasGraph;
 		var imgData = c.getImageData(0,0,this.width, this.height);
 
