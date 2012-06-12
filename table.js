@@ -29,6 +29,8 @@ var JsCHRIST_Table = function(core, screen)
 		for (var i = 0; i < b.data.length; ++i)
 			obj.addRow(b.data[i]);
 	});
+
+	$(this.div_table).find('tr').mouseover(log);
 }
 
 JsCHRIST_Table.prototype =
