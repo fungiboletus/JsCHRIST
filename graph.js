@@ -120,13 +120,13 @@ JsCHRIST_Graph.prototype =
 		
 		//trace les lignes verticales de la grille
 		for(var i = margin_y + step_x ; i < this.width ; i += step_x){
-			c.moveTo(i , this.height - margin_x);
+			c.moveTo(i , this.height);
 			c.lineTo(i, 0);
 		}
 		
 		//trace les lignes horizontales de la grille
 		for(var i = this.height - margin_x - step_y ; i > 0 ; i -= step_y){
-			c.moveTo(margin_x, i);
+			c.moveTo(0, i);
 			c.lineTo(this.width, i);
 		}
 		
@@ -298,7 +298,7 @@ JsCHRIST_Graph.prototype =
 			this.y_i[key] = y_i;
 			
 			//actualise les axes...
-			this.drawAxes(5, 5, 80, 50, true);
+			this.drawAxes(20, 20, 100, 80, true);
 		}
 
 		c.stroke();
