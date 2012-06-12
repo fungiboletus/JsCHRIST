@@ -109,7 +109,6 @@ JsCHRIST_Graph.prototype =
 	{
 		//init canvas
 		var c = this.canvasAxes;
-		
 		c.clearRect(0,0, this.width, this.height);
 		
 		c.beginPath();
@@ -125,6 +124,28 @@ JsCHRIST_Graph.prototype =
 		//dessine la ligne de l'axe des abscisses
 		c.moveTo(0, this.height - height_x);
 		c.lineTo(this.width, this.height - height_x);
+		
+		//dessine la ligne de l'axe des ordonnées
+		c.moveTo(0, 0);
+		c.lineTo(0, this.height);
+		
+		//calcule les coefs pour l'échelle automatique, à partir des coefs permettant l'affichage du graphique
+		var npx_x = 1;
+		var npx_y = 1;
+		var min_px = 50;
+		var range_x = 0;
+		var range_y = 0;
+		while(npx_x < min_px){
+			range_x = this.core.data[key].timeMax - this.core.data[key].timeMin;
+			
+		}
+		/*while(npx_y < min_px){
+			npx_y++;
+		}*/
+		
+		//trace les graduations en x
+		
+		//trace les graduations en y
 		
 		c.stroke();
 		c.closePath();
@@ -150,12 +171,10 @@ JsCHRIST_Graph.prototype =
 				last = middle - 1;
 			}
 		}
-		log("coucou");
 		
 		this.pointedValue = data[first].data;
 		log(this.pointedValue);
-		this.pointedTime = data[first].time_t;
-		*/
+		this.pointedTime = data[first].time_t;*/
 		
 		for(var i = 0 ; i < data.length-1 ; i++){
 			if(Date.parse(data[i].time_t) >= value_x){
