@@ -51,10 +51,6 @@ JsCHRIST.prototype =
 					var start_t = Date.parse(json.start_t);
 					var date = new Date(start_t);
 					var data  = {
-						timeMin: date,
-						timeMax: date,
-						dataMin: json.data[0].rythme,
-						dataMax: json.data[0].rythme,
 						data: []
 					};
 
@@ -65,15 +61,31 @@ JsCHRIST.prototype =
 					var start_t = Date.parse(json.start_t);
 
 					var i = 0;
+					
+					var _addTuple = function(i)
+					{
+						var tuple =json.data[i];
+						start_t += tuple.dt;
+						tuple.time_t = new Date(start_t);
+						delete tuple.dt;
+						
+						obj.addTuple(data, tuple);
+						return tuple;
+					}
+
+					for (; i < json.data.length/2; ++i)
+						_addTuple(i);
+
+					$(obj).trigger("jschrist.new_tuples", {
+						statement_name: nom,
+						data: data.data
+					});
 
 					var intervale = window.setInterval(function(){
-						start_t += json.data[i].dt;
-						var tuple = {time_t: new Date(start_t), data: json.data[i].rythme};
-						obj.addTuple(data, tuple); 
 
 						$(obj).trigger("jschrist.new_tuples", {
 							statement_name: nom,
-							data: [tuple]
+							data: [_addTuple(i)]
 						});
 
 						if (++i == json.data.length)
@@ -98,7 +110,6 @@ JsCHRIST.prototype =
 					li.appendChild(document.createTextNode(report));
 					li.onclick = clic_releve;
 					list.append(li);
-					log(report);
 				}
 			},
 			error: function(e) {
@@ -110,11 +121,13 @@ JsCHRIST.prototype =
 
 	addTuple: function(data, tuple)
 	{
-		if (tuple.time_t < data.timeMin) data.timeMin = tuple.time_t;
-		if (tuple.time_t > data.timeMax) data.timeMax = tuple.time_t;
-		if (tuple.data < data.dataMin) data.dataMin = tuple.data;
-		if (tuple.data > data.dataMax) data.dataMax = tuple.data;
-
+		for (var key in tuple)
+		{
+			var keyMin = key+'Min';
+			var keyMax = key+'Max';
+			if (!(keyMin in data) || tuple[key] < data[keyMin]) data[keyMin] = tuple[key];
+			if (!(keyMax in data) || tuple[key] > data[keyMax]) data[keyMax] = tuple[key];
+		}
 		data.data.push(tuple);
 	}
 };
