@@ -128,7 +128,6 @@ JsCHRIST.prototype =
 			if (!(keyMin in data) || tuple[key] < data[keyMin]) data[keyMin] = tuple[key];
 			if (!(keyMax in data) || tuple[key] > data[keyMax]) data[keyMax] = tuple[key];
 		}
-		log(data);
 		data.data.push(tuple);
 	}
 };

@@ -1,4 +1,4 @@
-JsCHRIST_Graph = function(core, screen)
+var JsCHRIST_Graph = function(core, screen)
 {
 	// Représente l'instance des données à traiter
 	this.core = core;
