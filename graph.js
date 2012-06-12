@@ -160,12 +160,12 @@ JsCHRIST_Graph.prototype =
 		var data = this.core.data[key].data; //TODO
 
 		if (this.decalage_x[key] == undefined) this.decalage_x[key] = 0.0;
-	
+		
 		var value_x = ((this.decalage_x[key] + this.mousePos) / this.coef_x) + Date.parse(this.core.data[key].time_tMin);
 
 		//var value_y = 0;
 		
-		//TODO recherche dichotomique du temps correspondant:
+		// recherche dichotomique du temps correspondant:
 		var first = 0;
 		var last = data.length-1;
 		var middle = 0;
