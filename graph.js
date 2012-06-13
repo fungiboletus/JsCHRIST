@@ -200,10 +200,15 @@ JsCHRIST_Graph.prototype =
 				last = middle - 1;
 			}
 		}
-		
-		this.pointedValue = data[first].data;
-		//log(this.pointedValue);
-		this.pointedTime = data[first].time_t;
+		//test du plus proche entre last et first
+		if(Math.abs(data[first] - value_x) < Math.abs(data[last] - value_x)){
+			this.pointedValue = data[first].data;
+			this.pointedTime = data[first].time_t;
+		}
+		else{
+			this.pointedValue = data[last].data;
+			this.pointedTime = data[last].time_t;
+		}
 	},
 	
 	setLadderCoeff: function(key, elem)
