@@ -313,7 +313,7 @@ JsCHRIST_Graph.prototype =
 			this.x_i[key] = x_i;
 			this.y_i[key] = y_i;
 			
-			//actualise les axes...
+			//actualise les axes... TODO ne pas faire ça ici !!!! TODO TODO TODO TODO TODO
 			this.drawAxes(20, 20, 100, 80, true);
 		}
 
