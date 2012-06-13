@@ -148,7 +148,7 @@ background:blue;
 color:yellow;
 }
 
-.table tr:hover
+.table tr:hover, .table tr.selected
 {
 background:grey;
 }

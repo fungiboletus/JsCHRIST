@@ -29,6 +29,11 @@ var JsCHRIST_Table = function(core, screen)
 		for (var i = 0; i < b.data.length; ++i)
 			obj.addRow(b.data[i]);
 	});
+	
+	$(core).bind("jschrist.time_sync", function(a, b)
+	{
+		//$(obj.tbody).find('tr')
+	});
 }
 
 JsCHRIST_Table.prototype =
@@ -56,6 +61,7 @@ JsCHRIST_Table.prototype =
 		for (var key in tuple)
 		{
 			var td = newDom('td');
+			td.data = tuple;
 			td.appendChild(document.createTextNode(tuple[key]));
 			tr.appendChild(td);
 		}

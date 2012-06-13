@@ -36,7 +36,7 @@ var JsCHRIST_Graph = function(core, screen)
 	
 	// Position de la souris
 	this.mousePos = 0;
-	this.paintedMousePose = -1;
+	this.paintedLine = -1;
 	
 	//valeur pointée :
 	this.pointedValue = 0;
@@ -50,7 +50,6 @@ var JsCHRIST_Graph = function(core, screen)
 	var obj = this;
 	$(this.screen).mousemove(function(e) {
 		obj.mousePos = e.offsetX;
-		obj.paintLine();
 		
 		//FIXME trouver la key... ^^
 		for (var d in obj.core.data)
@@ -70,6 +69,17 @@ var JsCHRIST_Graph = function(core, screen)
 				obj.paintGraph(false, b.statement_name, elem, b.data);
 	});
 
+	$(core).bind("jschrist.time_sync", function(a, b)
+	{
+		//FIXME trouver la key... ^^
+		for (var key in obj.core.data)
+		{
+			var tmp_x = (Date.parse(b.time_t) - Date.parse(obj.core.data[key].time_tMin))* obj.coef_x - obj.decalage_x[key];
+			//log(tmp_x);
+			obj.paintLine(tmp_x);
+			break;
+		}
+	});
 }
 
 JsCHRIST_Graph.prototype =
@@ -90,23 +100,23 @@ JsCHRIST_Graph.prototype =
 	},
 
 	// Afficher la ligne de sélection
-	paintLine: function()
+	paintLine: function(position)
 	{
 		var c = this.canvasLine;
 
 		// Masquage de l'ancien emplacement
-		if (this.paintedMousePose >= 0)
-			c.clearRect(this.paintedMousePose - 5,0, 10, this.height);
+		if (this.paintedLine >= 0)
+			c.clearRect(this.paintedLine - 5,0, 10, this.height);
 
 		c.beginPath();
 		c.strokeStyle = "white";
 		c.lineWidth = 2;
-		c.moveTo(this.mousePos, 0);
-		c.lineTo(this.mousePos, this.height);
+		c.moveTo(position, 0);
+		c.lineTo(position, this.height);
 		c.stroke();
 		c.closePath();
 
-		this.paintedMousePose = this.mousePos;
+		this.paintedLine = position;
 	},
 	
 	drawAxes: function(key)
