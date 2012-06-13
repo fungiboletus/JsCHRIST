@@ -255,6 +255,7 @@ JsCHRIST_Graph.prototype =
 		if (data == undefined || this.coef_y != coef_y)
 		{
 			fullPaint = true;
+			// TODO mettre à jour le décalage lors du changement de l'échelle
 			coef_x = this.coef_x;
 			coef_y = this.coef_y;
 		}
@@ -326,6 +327,7 @@ JsCHRIST_Graph.prototype =
 	},
 
 	// Décalage du graphe en prenant les pixels du canvas
+	// TODO le décalage ne prend pas en compte un changement d'échelle
 	decalerGraph: function(key, decalage)
 	{
 		if (this.decalage_x[key] == undefined) this.decalage_x[key] = decalage;
