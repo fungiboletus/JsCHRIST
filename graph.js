@@ -18,6 +18,7 @@ var JsCHRIST_Graph = function(core, screen)
 	this.screen.appendChild(this.screenLine);
 	this.canvasLine = this.screenLine.getContext('2d');
 	
+	//tracé des axes
 	this.screenAxes = newDom('canvas');
 	this.screenAxes.id = "screenAxes";
 	this.screen.appendChild(this.screenAxes);
@@ -51,13 +52,11 @@ var JsCHRIST_Graph = function(core, screen)
 	$(this.screen).mousemove(function(e) {
 		obj.mousePos = e.offsetX;
 		
-		//FIXME trouver la key... ^^
 		for (var d in obj.core.data)
 		{
 			obj.getPointedValue(d);
 			break;
-		}
-		
+		}	
 		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
 
@@ -95,6 +94,8 @@ JsCHRIST_Graph.prototype =
 		obj.screenGraph.height = obj.height;
 		obj.screenLine.width = obj.width;
 		obj.screenLine.height = obj.height;
+		obj.screenAxes.width = obj.width;
+		obj.screenAxes.height = obj.height;
 		
 		//obj.paintGraph(true);
 	},
@@ -119,29 +120,73 @@ JsCHRIST_Graph.prototype =
 		this.paintedLine = position;
 	},
 	
-	drawAxes: function(key)
+	drawGrid : function(margin_x, margin_y, step_x, step_y)
+	{
+		var c = this.canvasAxes;
+		
+		c.beginPath();
+		c.strokeStyle = "white";
+		c.lineWidth = 0.5;
+		
+		//trace les lignes verticales de la grille
+		for(var i = margin_y + step_x ; i < this.width ; i += step_x){
+			c.moveTo(i , this.height);
+			c.lineTo(i, 0);
+		}
+		
+		//trace les lignes horizontales de la grille
+		for(var i = this.height - margin_x - step_y ; i > 0 ; i -= step_y){
+			c.moveTo(0, i);
+			c.lineTo(this.width, i);
+		}
+		
+		c.stroke();
+		c.closePath();
+	},
+	
+	/**
+	* margin_x = decalage de l'axe des abscisses vers le haut de la boite
+	* margin_y = decalage de l'axe des ordonnées vers la droite de la boite
+	* step_x = espacement en pixels entre chaque graduation de l'axe des abscisses
+	* step_y = espacement en pixels entre chaque graduation de l'axe des ordonnées
+	* miligrid = booleen décidant si on trace un papier milimetré ou non...
+	*/
+	drawAxes: function(margin_x, margin_y, step_x, step_y, grid)
 	{
 		//init canvas
 		var c = this.canvasAxes;
-		
 		c.clearRect(0,0, this.width, this.height);
 		
 		c.beginPath();
 		c.strokeStyle = "white";
-		c.lineWidth = 2;
-		
-		//trouver la hauteur de l'axe des abscisses
-		var height_x = 0;
-		if(this.core.data[key].dataMin < 0){
-			height_x = (0 - this.core.data[key].dataMin)* this.coef_x;
-		}
+		c.lineWidth = 1;
 		
 		//dessine la ligne de l'axe des abscisses
-		c.moveTo(0, this.height - height_x);
-		c.lineTo(this.width, this.height - height_x);
+		c.moveTo(0, this.height - margin_x);
+		c.lineTo(this.width, this.height - margin_x);
+
+		//dessine la ligne de l'axe des ordonnées
+		c.moveTo(margin_y, 0);
+		c.lineTo(margin_y, this.height);
+		
+		//fout des graduations sur l'axe des abscisses :
+		for(var i = margin_y + step_x ; i < this.width ; i += step_x){
+			c.moveTo(i , this.height - margin_x + 5);
+			c.lineTo(i, this.height - margin_x - 5);
+		}
+		
+		//fout des graduations sur l'axe des ordonnées :
+		for(var i = this.height - margin_x - step_y ; i > 0 ; i -= step_y){
+			c.moveTo(margin_x + 5, i);
+			c.lineTo(margin_x - 5, i);
+		}
 		
 		c.stroke();
 		c.closePath();
+		
+		if(grid){
+			this.drawGrid(margin_x, margin_y, step_x, step_y);
+		}
 	},
 	
 	//TODO pouvoir identifier le graph ou la souris est, afin de pouvoir afficher la valeur des bonnes données !!
@@ -149,43 +194,31 @@ JsCHRIST_Graph.prototype =
 		var data = this.core.data[key].data; //TODO
 
 		if (this.decalage_x[key] == undefined) this.decalage_x[key] = 0.0;
-	
-		var value_x = ((this.decalage_x[key] + this.mousePos) / this.coef_x) + Date.parse(this.core.data[key].time_tMin);
-
-		var value_y = 0;
 		
-		//TODO recherche dichotomique du temps correspondant:
-		/*var first = 0;
+		var value_x = ((this.decalage_x[key] + this.mousePos) / this.coef_x) + Date.parse(this.core.data[key].time_tMin);
+		
+		// recherche dichotomique du temps correspondant:
+		var first = 0;
 		var last = data.length-1;
 		var middle = 0;
-		var i = 0;
 		while(first < last){
-			middle = Math.floor((last - first) / 2) + first;
-			log(middle);
-			if(Date.parse(data[middle].time_t) > value_x){
+			middle = Math.floor((last + first) / 2);
+			if(Date.parse(data[middle].time_t) < value_x){
 				first = middle + 1;
 			}
 			else{
 				last = middle - 1;
 			}
-			if (++i == 50) break;
 		}
-		log("coucou");
-		
-		this.pointedValue = data[first].data;
-		log(this.pointedValue);
-		this.pointedTime = data[first].time_t;*/
-		
-		for(var i = 0 ; i < data.length-1 ; i++){
-			if(Date.parse(data[i].time_t) >= value_x){
-				value_y = data[i].data;
-				break;
-			}
+		//test du plus proche entre last et first
+		if(Math.abs(data[first] - value_x) < Math.abs(data[last] - value_x)){
+			this.pointedValue = data[first].data;
+			this.pointedTime = data[first].time_t;
 		}
-		
-		this.pointedValue = value_y;
-		//log(value_y);
-		this.pointedTime = data[i].time_t;
+		else{
+			this.pointedValue = data[last].data;
+			this.pointedTime = data[last].time_t;
+		}
 	},
 	
 	setLadderCoeff: function(key, elem)
@@ -280,7 +313,7 @@ JsCHRIST_Graph.prototype =
 			this.y_i[key] = y_i;
 			
 			//actualise les axes...
-			this.drawAxes(key);
+			this.drawAxes(20, 20, 100, 80, true);
 		}
 
 		c.stroke();
