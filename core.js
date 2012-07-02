@@ -1,6 +1,7 @@
-function JsCHRIST()
+function JsCHRIST(config)
 {
 	this.data = {};
+	this.config = config; 
 };
 
 JsCHRIST.prototype =
@@ -46,7 +47,7 @@ JsCHRIST.prototype =
 			$(canard.srcElement).addClass('selected');
 
 			$.ajax({
-				url: "../app/RestJson/data_dt/"+encodeURIComponent(nom),
+				url: obj.config.data_dt_url+encodeURIComponent(nom),
 				success: function(json) {
 					var start_t = Date.parse(json.start_t);
 					var date = new Date(start_t);
@@ -100,7 +101,7 @@ JsCHRIST.prototype =
 		};
 
 		$.ajax({
-			url: "../app/RestJson/reports",
+			url: obj.config.reports_url,
 			success: function(json) {
 				var list = $('#reportList ul');
 				list.empty();

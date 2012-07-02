@@ -11,7 +11,7 @@ height:100%;
 }
 
 body {
-background:url(fond2.jpeg);
+background:black;
 font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
@@ -51,6 +51,7 @@ height:50%;
 
 .box {
 position:relative;
+background:url(fond2.jpeg);
 }
 
 .box canvas {
@@ -89,6 +90,7 @@ display:block;
 margin:2px -8px 2px -8px;
 padding:2px 0px 2px 8px;
 cursor:pointer;
+color:white;
 }
 #reportList ul li:hover {
 background:rgba(255,255,255,0.1);
@@ -166,3 +168,9 @@ text-align:center;
 {
 background:rgba(255,255,255,0.3);
 }*/
+
+h1, h2, h3, h4, h5, h6
+{
+color:white;
+}
+

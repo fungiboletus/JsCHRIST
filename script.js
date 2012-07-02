@@ -1,7 +1,11 @@
 var instanceJsCHRIST = null;
 
 $(document).ready(function() {
-	instanceJsCHRIST = new JsCHRIST();
+
+	instanceJsCHRIST = new JsCHRIST((typeof JsCHRIST_Config !== "undefined") ? JsCHRIST_Config : {
+		data_dt_url: "../app/RestJson/data_dt/",
+		reports_url: "../app/RestJson/reports"
+	});
 	instanceJsCHRIST.onready();
 
 	new JsCHRIST_Graph(instanceJsCHRIST, byId('screen'));

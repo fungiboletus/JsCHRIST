@@ -212,11 +212,11 @@ JsCHRIST_Graph.prototype =
 		}
 		//test du plus proche entre last et first
 		if(Math.abs(data[first] - value_x) < Math.abs(data[last] - value_x)){
-			this.pointedValue = data[first].data;
+			//this.pointedValue = data[first].data;
 			this.pointedTime = data[first].time_t;
 		}
 		else{
-			this.pointedValue = data[last].data;
+			//this.pointedValue = data[last].data;
 			this.pointedTime = data[last].time_t;
 		}
 	},
@@ -256,6 +256,10 @@ JsCHRIST_Graph.prototype =
 		{
 			fullPaint = true;
 			// TODO mettre à jour le décalage lors du changement de l'échelle
+			/*log(coef_x);
+			log(this.coef_x);
+			/*if (coef_x != undefined && this.coef_x != undefined)
+				this.decalage_x[key] /= coef_x/this.coef_x;*/
 			coef_x = this.coef_x;
 			coef_y = this.coef_y;
 		}
@@ -314,7 +318,7 @@ JsCHRIST_Graph.prototype =
 			this.y_i[key] = y_i;
 			
 			//actualise les axes... TODO ne pas faire ça ici !!!! TODO TODO TODO TODO TODO
-			this.drawAxes(20, 20, 100, 80, true);
+			this.drawAxes(20, 20, 100, 80, false);
 		}
 
 		c.stroke();
