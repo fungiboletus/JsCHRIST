@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test de boites</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	<link href="boites.css" media="screen" rel="Stylesheet" type="text/css" />
+	<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="boites.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+function get_random_color() {
+	var letters = '0123456789ABCDEF'.split('');
+	var color = '#';
+	for (var i = 0; i < 6; i++ ) {
+		color += letters[Math.round(Math.random() * 15)];
+	}
+	return color;
+}
+
+function bb() {
+	boiboites.newBox().style.background = get_random_color();
+}
+
+$(document).ready(function() {
+	boiboites = new Boites(document.body);
+	window.setInterval(bb, 500);
+});
+	</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+body {
+background:black;
+position:absolute;
+top:0;
+left:0;
+bottom:0;
+right:0;
+overflow:hidden;
+}
+
+.box {
+position:absolute;
+top:50%;
+left:50%;
+width:0px;
+height:0px;
+background:pink;
+-webkit-transition-property:width, left, top, height;
+-webkit-transition-duration: 1s;
+-webkit-transition-timing-function:ease;
+}
