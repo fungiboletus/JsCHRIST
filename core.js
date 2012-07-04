@@ -9,6 +9,14 @@ JsCHRIST.prototype =
 	onready: function()
 	{
 		$('#closeFullscreenButton').hide();
+		$(window).resize(this, function()
+		{
+			if (window.innerWidth == window.screen.width && window.innerHeight == window.screen.height)
+				$(document.body).addClass('fullscreen');
+			else
+				$(document.body).removeClass('fullscreen');
+		});
+
 		var elem = window.document.documentElement;
 		if (!elem.requestFullScreen && !elem.mozRequestFullScreen && !elem.webkitRequestFullScreen)
 			$('#openFullscreenButton').hide();

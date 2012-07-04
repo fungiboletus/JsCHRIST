@@ -56,7 +56,7 @@ var JsCHRIST_Graph = function(core, screen)
 		{
 			obj.getPointedValue(d);
 			break;
-		}	
+		}
 		$(obj.core).trigger("jschrist.time_sync", {time_t: obj.pointedTime});
 	});
 

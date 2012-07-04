@@ -18,13 +18,37 @@ function get_random_color() {
 	return color;
 }
 
-function bb() {
-	boiboites.newBox().style.background = get_random_color();
+function bb(boiboites) {
+	var box = boiboites.newBox();
+	box.style.background = get_random_color();
+	return box;
 }
 
 $(document).ready(function() {
-	boiboites = new Boites(document.body);
-	window.setInterval(bb, 500);
+	boiboites = new Boites(document.body, Boites_DIRECTIONS.VERTICAL);
+	canvaas = bb(boiboites);
+	setTimeout(function()
+	{
+		lapin = boiboites.newBoite(Boites_DIRECTIONS.HORIZONTAL);
+		bb(lapin);
+		bb(lapin);
+		setTimeout(function()
+		{
+			canard = lapin.newBoite(Boites_DIRECTIONS.VERTICAL);
+			bb(canard);
+			bb(canard);
+			bb(canard);
+		}, 1);
+	}, 1);
+	
+	canvas = document.createElement('canvas');
+	canvaas.appendChild(canvas);
+	setTimeout(function() {boiboites.dessinerCanvas(canvas);}, 200);
+
+	$(canvas).mousemove(function(e){
+		boiboites.dessinerCanvas(canvas, e.offsetX, e.offsetY);
+	});
+	//window.setInterval(bb, 500);
 });
 	</script>
 </body>

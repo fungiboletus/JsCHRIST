@@ -14,8 +14,28 @@ top:50%;
 left:50%;
 width:0px;
 height:0px;
+}
+
+.boxdiv {
 background:pink;
 -webkit-transition-property:width, left, top, height;
 -webkit-transition-duration: 1s;
 -webkit-transition-timing-function:ease;
+}
+
+.box .options {
+position:absolute;
+left:50%;
+top:50%;
+width:150px;
+height:150px;
+margin-top:-75px;
+margin-left:-75px;
+border-radius:12px;
+background:blue;
+display:none;
+z-index:1;
+}
+.box:hover > .options {
+display:block;
 }

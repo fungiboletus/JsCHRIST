@@ -3,6 +3,11 @@ font-family: FuturaPerso;
 src: url("futura.otf");
 }
 
+html
+{
+overflow-y:auto;
+}
+
 html, body {
 margin:0;
 padding:0;
