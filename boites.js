@@ -2,6 +2,8 @@ function Boites(rootNode, direction)
 {
 	if (!(rootNode instanceof HTMLElement)) alert("The rootNode parameter is not a HTML element");
 	this.rootNode = rootNode;
+
+	//$(rootNode).mousemove(function(e){console.log(e);});
 	
 	this.boxes = [];
 
@@ -16,16 +18,20 @@ Boites_DIRECTIONS = {VERTICAL: 1, HORIZONTAL: 2};
 
 Boites.prototype = 
 {
-	newBox: function()
+	createBox: function()
 	{
 		var div = document.createElement('div');
 		div.className = 'box boxdiv';
+		this.rootNode.appendChild(div);
+		return div;
+	},
 
+	newBox: function()
+	{
+		var div = this.createBox();
 		var options = document.createElement('div');
 		options.className = 'options';
 		div.appendChild(options);
-
-		this.rootNode.appendChild(div);
 
 		this.boxes.push(div);
 
@@ -177,6 +183,56 @@ Boites.prototype =
 					y,
 					width,
 					height);
+			}
+		}
+	},
+
+	identifierZonePointee: function(mouse_x, mouse_y)
+	{
+		this.identifierPartieZonePointee(0, 0, this.width, this.height, mouse_x, mouse_y);
+	},
+	
+	identifierPartieZonePointee: function(jmp_x, jmp_y, width, height, mouse_x, mouse_y)
+	{
+		var height_jmp = 0;
+		var width_jmp = 0;
+		var nb_boxes = this.boxes.length;
+
+		if (this.direction == Boites_DIRECTIONS.VERTICAL)
+		{
+			height = Math.floor(height / nb_boxes);
+			height_jmp = height;
+		} else
+		{
+			width = Math.floor(width/ nb_boxes);
+			width_jmp = width;
+		}
+		
+		for (var i = 0; i < nb_boxes; ++i) {
+
+			var x = jmp_x + i * width_jmp;
+			var y = jmp_y + i * height_jmp;
+		
+			var box = this.boxes[i];
+
+			if (box instanceof HTMLElement) {
+				console.log("[mouse_x] "+mouse_x+" [mouse_y] "+mouse_y+" [x] "+x+" [y] "+y);
+				if (mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height)
+				{
+					console.log("super");
+					$(box).addClass('identifiee');
+				} else {
+					console.log("non");
+					$(box).removeClass('identifiee');
+				}
+			} else if (box instanceof Boites) {
+				box.identifierPartieZonePointee(
+					x,
+					y,
+					width,
+					height,
+					mouse_x,
+					mouse_y);
 			}
 		}
 	}

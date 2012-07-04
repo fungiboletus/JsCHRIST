@@ -41,6 +41,11 @@ z-index:1;
 display:block;
 }
 
+.box.identifiee {
+border:3px solid red;
+z-index:2;
+}
+
 .disposition_container {
 width:140px;
 height:140px;

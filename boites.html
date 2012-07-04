@@ -10,7 +10,7 @@
 <body>
 	<script type="text/javascript">
 function get_random_color() {
-	var letters = '0123456789ABCDEF'.split('');
+	var letters = '0123456789ABCDEF';
 	var color = '#';
 	for (var i = 0; i < 6; i++ ) {
 		color += letters[Math.round(Math.random() * 15)];
@@ -42,6 +42,15 @@ $(document).ready(function() {
 	}, 1);
 	
 	setTimeout(function() {boiboites.dessinerDisposition();}, 200);
+
+	didiv = boiboites.createBox();
+	didiv.style.background = 'red';
+
+	document.body.onmousemove = function(e)
+	{
+		console.log(e);
+		boiboites.identifierZonePointee(e.pageX, e.pageY);
+	};
 
 	//window.setInterval(bb, 500);
 });
