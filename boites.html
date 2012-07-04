@@ -41,13 +41,8 @@ $(document).ready(function() {
 		}, 1);
 	}, 1);
 	
-	canvas = document.createElement('canvas');
-	canvaas.appendChild(canvas);
-	setTimeout(function() {boiboites.dessinerCanvas(canvas);}, 200);
+	setTimeout(function() {boiboites.dessinerDisposition();}, 200);
 
-	$(canvas).mousemove(function(e){
-		boiboites.dessinerCanvas(canvas, e.offsetX, e.offsetY);
-	});
 	//window.setInterval(bb, 500);
 });
 	</script>

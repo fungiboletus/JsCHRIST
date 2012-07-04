@@ -121,67 +121,62 @@ Boites.prototype =
 		}
 	},
 
-	dessinerCanvas: function(canvas, mouse_x, mouse_y)
+	dessinerDisposition: function()
 	{
-		var width = canvas.width;
-		var height = canvas.height;
-		var c = canvas.getContext('2d');
-		c.clearRect(0, 0, width, height);
+		div = document.createElement('div');
+		document.body.appendChild(div);
+		var jdiv = $(div);
+		jdiv.addClass('disposition_container');
+		var width = jdiv.width();
+		var height = jdiv.height();
 
-		if (!mouse_x) mouse_x = -10;
-		if (!mouse_y) mouse_y = -10;
-		this.dessinerPartieCanvas(c, 5, 5, width-10, height-10, mouse_x, mouse_y);
+		this.dessinerPartieDisposition(div, 0, 0, width, height);
+
+		jdiv.appendTo(".options");
 	},
 
-	dessinerPartieCanvas: function(c, jmp_x, jmp_y, width, height, mouse_x, mouse_y)
+	dessinerPartieDisposition: function(div, jmp_x, jmp_y, width, height)
 	{
-		var marge = 4;
+		var marge = 2;
 		var height_jmp = 0;
 		var width_jmp = 0;
-		var nb_boxes = this.boxes.length;
+		var nb_boxes = this.boxes.length + 2;
 
 		if (this.direction == Boites_DIRECTIONS.VERTICAL)
 		{
 			height /= nb_boxes;
-			height_jmp = height + marge;
+			height_jmp = height;
 		} else
 		{
 			width /= nb_boxes;
-			width_jmp = width + marge;
+			width_jmp = width;
 		}
 		
-		//c.shadowBlur = 3;
-		c.shadowColor = "rgba(0,0,0,0.6)";
-		c.fillStyle = "white";
+		for (var i = -1; i < nb_boxes-1; ++i) {
 
-		for (var i = 0; i < nb_boxes; ++i) {
-			var box = this.boxes[i];
 
-			var x = jmp_x + i * width_jmp;
-			var y = jmp_y + i * height_jmp;
-			if (box instanceof HTMLElement) {
-				var selected = mouse_x >= x && mouse_x <= x + width && mouse_y >= y && mouse_y <= y + height;
+			var x = jmp_x + (i+1) * width_jmp;
+			var y = jmp_y + (i+1) * height_jmp;
+		
+			var box = (i < 0 || i == nb_boxes - 2) ? null : this.boxes[i];
 
-				if (selected) {
-					c.save();
-					c.fillStyle = "red";
-				}
+			if (!box || box instanceof HTMLElement) {
 
-				c.fillRect(	
+				var ndiv = document.createElement('a');
+				ndiv.className = 'disposition_div';
+				if (i < 0) ndiv.className += ' disposition_before';
+				if (i == nb_boxes - 2) ndiv.className += ' disposition_after';
+				ndiv.style.left = x+marge/2+'px';
+				ndiv.style.top = y+marge/2+'px';
+				ndiv.style.width = width-marge+'px';
+				ndiv.style.height = height-marge+'px';
+				div.appendChild(ndiv);
+			} else if (box instanceof Boites) {
+				box.dessinerPartieDisposition(div,
 					x,
 					y,
 					width,
 					height);
-				
-				if (selected)
-					c.restore();
-			} else {
-				box.dessinerPartieCanvas(c,
-					x,
-					y,
-					width-marge,
-					height-marge-marge,
-					mouse_x, mouse_y);
 			}
 		}
 	}
