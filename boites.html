@@ -9,6 +9,14 @@
 </head>
 <body>
 	<script type="text/javascript">
+Array.prototype.remove = function(elem) {
+    var match = -1;
+
+    while( (match = this.indexOf(elem)) > -1 ) {
+        this.splice(match, 1);
+    }
+};
+
 function get_random_color() {
 	var letters = '0123456789ABCDEF';
 	var color = '#';
@@ -18,23 +26,37 @@ function get_random_color() {
 	return color;
 }
 
-function bb(boiboites) {
-	var box = boiboites.newBox();
-	box.style.background = get_random_color();
-	return box;
-}
 
 $(document).ready(function() {
-	boiboites = new Boites(document.body, Boites_DIRECTIONS.VERTICAL);
-	canvaas = bb(boiboites);
-	setTimeout(function()
+	boiboites = new Boxes_layout(document.body, Boxes_DIRECTIONS.VERTICAL);
+	function bb() {
+		var box = boiboites.createBox();
+		var color = get_random_color();
+		box.style.background = color;
+		box.id = "box_"+color.slice(1); 
+		return box;
+	}
+	canvaas = bb();
+	boiboites.addBox(canvaas);
+
+	lapin = new Boxes_container(boiboites, Boxes_DIRECTIONS.HORIZONTAL);
+	boiboites.addBox(lapin);
+	boiboites.addBox(bb(), lapin);
+	boiboites.addBox(bb(), lapin);
+	canard = new Boxes_container(boiboites, Boxes_DIRECTIONS.VERTICAL);
+	boiboites.addBox(canard, lapin);
+	boiboites.addBox(bb(), canard);
+	boiboites.addBox(bb(), canard);
+	boiboites.addBox(bb(), canard);
+	setTimeout(function(){boiboites.equilibrate();}, 1);
+	/*setTimeout(function()
 	{
-		lapin = boiboites.newBoite(Boites_DIRECTIONS.HORIZONTAL);
+		lapin = boiboites.newBoite(Boxes_DIRECTIONS.HORIZONTAL);
 		bb(lapin);
 		bb(lapin);
 		setTimeout(function()
 		{
-			canard = lapin.newBoite(Boites_DIRECTIONS.VERTICAL);
+			canard = lapin.newBoite(Boxes_DIRECTIONS.VERTICAL);
 			bb(canard);
 			bb(canard);
 			bb(canard);
@@ -42,15 +64,13 @@ $(document).ready(function() {
 	}, 1);
 	
 	setTimeout(function() {boiboites.dessinerDisposition();}, 200);
-
-	didiv = boiboites.createBox();
-	didiv.style.background = 'red';
+*/
+	didiv = bb();
 
 	document.body.onmousemove = function(e)
 	{
-		console.log(e);
-		boiboites.identifierZonePointee(e.pageX, e.pageY);
-	};
+		boiboites.hover(e.pageX, e.pageY);
+	}
 
 	//window.setInterval(bb, 500);
 });

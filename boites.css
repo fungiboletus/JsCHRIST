@@ -37,9 +37,9 @@ box-shadow:0px 0px 5px rgba(0,0,0,0.5);
 display:none;
 z-index:1;
 }
-.box:hover > .options {
+/*.box:hover > .options {
 display:block;
-}
+}*/
 
 .box.identifiee {
 border:3px solid red;
