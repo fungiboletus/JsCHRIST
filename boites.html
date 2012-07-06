@@ -5,7 +5,6 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 	<link href="boites.css" media="screen" rel="Stylesheet" type="text/css" />
 	<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
-	<script type="text/javascript" src="jquery.transit.min.js"></script>
 	<script type="text/javascript" src="boites.js"></script>
 </head>
 <body>
@@ -93,24 +92,41 @@ $(document).ready(function() {
 		boiboites.drag_enabled = true;
 		boiboites.dragged_box = null;
 		document.body.removeEventListener('mousemove', drag);
-		jbouton.transition({
+		jbouton.animate({
 			top:'0px',
 			left: '0px'}, 250);
 	};
 	jbouton.mouseup(stop_drag);
 	//jbouton.mouseout(stop_drag);
 	//window.setInterval(bb, 500);
-	$('.boxdiv').transition({
-		/*perspective: '1000px',*/
-		rotateY: '90deg',
-	}, 250, 'in', function(div){
-		$(this).transition({
-			rotateY: '0',
-		}, 250, 'in');
-		});
-});
 
+	jbouton.hide();
+
+	$('#flip').click(function() {
+
+		jboxes = $('.boxdiv');
+		jboxes.addClass('flipped_animation');
+
+		setTimeout(function() {
+			jboxes.removeClass('flipped_animation');
+			if (!boiboites.front)
+			{
+				jboxes.find('.front').css({display: 'none'});
+				jboxes.find('.back').css({display: 'block'});
+			} else {
+				jboxes.find('.front').css({display: 'block'});
+				jboxes.find('.back').css({display: 'none'});
+			}
+		}, 600);
+		if (boiboites.front)
+			jbouton.show();
+		else
+			jbouton.hide();
+		boiboites.front = !boiboites.front;
+	});
+});
 	</script>
-<div id="bouton_boite">Nouvelle Boite Magique</a>
+<div id="bouton_boite" style="display:none;">Nouvelle Boite Magique</div>
+<div id="flip">Flip!</div>
 </body>
 </html>

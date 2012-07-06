@@ -1,5 +1,5 @@
 body {
-background:black;
+background:#32322A;
 position:absolute;
 top:0;
 left:0;
@@ -19,17 +19,35 @@ height:0px;
 .boxdiv {
 background:pink;
 -webkit-transition-property:width, left, top, height, -webkit-transform;
--webkit-transition-duration: 1s;
+-webkit-transition-duration: 0.6s;
 -webkit-transition-timing-function:ease;
 -moz-transition-property:width, left, top, height, -moz-transform;
--moz-transition-duration: 1s;
+-moz-transition-duration: 0.6s;
 -moz-transition-timing-function:ease;
 transition-property:width, left, top, height, transform;
-transition-duration: 1s;
+transition-duration: 0.6s;
 transition-timing-function:ease;
 -webkit-user-select: none;
 -moz-user-select: none;
 user-select: none;
+
+border-radius:10px;
+box-shadow:0px 0px 4px rgba(0,0,0,0.5);
+}
+
+.boxdiv .front, .boxdiv .back {
+padding:4px 8px 4px 8px;
+}
+.boxdiv .back {
+box-shadow:1px 1px 8px rgba(0,0,0,0.5) inset;
+border:2px solid rgba(100,100,100,0.2);
+border-radius:8px;
+background:url(fond_metal.jpeg);
+position:absolute;
+top:0;
+left:0;
+bottom:0;
+right:0;
 }
 
 .box .options {
@@ -51,17 +69,19 @@ display:block;
 }*/
 
 .box.identifiee {
-border:3px solid red;
 z-index:2;
 }
 .box.dragged {
 	z-index:2;
-	border:3px dotted white;
 }
 
-.boxdiv.flipped {
--webkit-transform:perspective(1000px) rotateY(90deg);
--moz-transform:perspective(1000px) rotateY(90deg);
+.box.identifiee .back, .box.identifiee .front, .box.dragged .back, .box.dragged .front{
+border-color:white;
+}
+
+.boxdiv.flipped_animation {
+-webkit-transform:rotateY(90deg);
+-moz-transform:rotateY(90deg);
 }
 
 .disposition_container {
@@ -90,7 +110,7 @@ background:orange;
 background:red;
 }
 
-#bouton_boite {
+#bouton_boite, #flip{
 	position:fixed;
 	z-index:3;
 	background:rgba(0,0,0,0.5);
@@ -99,4 +119,9 @@ background:red;
 -webkit-user-select: none;
 -moz-user-select: none;
 user-select: none;
+border:3px solid orange;
+}
+
+#flip {
+	right:10px;
 }

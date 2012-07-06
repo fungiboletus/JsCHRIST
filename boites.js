@@ -12,15 +12,16 @@ function Boxes_layout(rootNode, direction)
 
 	this.dragged_box = null;
 	this.drag_enabled = true;
+	this.front = true;
 
 	var jNode = $(this.rootNode);
 	var obj = this;
 	jNode.mousedown(function(){
-		if (obj.drag_enabled) {
+		if (!obj.front && obj.drag_enabled) {
 			var jdragged_box = jNode.find('.boxdiv.identifiee');
 			jdragged_box.addClass('dragged');
 			obj.dragged_box = jdragged_box[0];}});
-	jNode.mouseup(function(){if (obj.drag_enabled){
+	jNode.mouseup(function(){if (!obj.front && obj.drag_enabled){
 		$(obj.dragged_box).removeClass('dragged');
 		obj.dragged_box = null;
 	}});
@@ -37,7 +38,18 @@ Boxes_layout.prototype =
 	createBox: function()
 	{
 		var div = document.createElement('div');
-		div.appendChild(document.createTextNode('vive les canards'));
+
+		var front = document.createElement('div');
+		front.className = 'front';
+		front.appendChild(document.createTextNode('vive les canards'));
+		div.appendChild(front);
+
+		var back = document.createElement('div');
+		back.className = 'back';
+		back.appendChild(document.createTextNode('ceci est un test'));
+		back.style.display = 'none';
+
+		div.appendChild(back);
 		return this.transformBox(div);
 	},
 
@@ -68,12 +80,13 @@ Boxes_layout.prototype =
 
 	equilibrate: function()
 	{
+		var marge = 3;
 		this.processing(
 			function (box, x, y, width, height, containers) {
-				y += 'px';
-				x += 'px';
-				height += 'px';
-				width += 'px';
+				y = y + marge + 'px';
+				x = x + marge + 'px';
+				height = height - marge - marge + 'px';
+				width = width - marge - marge + 'px';
 
 				if (box.style.top != y) box.style.top = y;
 				if (box.style.left != x) box.style.left = x;
