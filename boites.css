@@ -18,9 +18,18 @@ height:0px;
 
 .boxdiv {
 background:pink;
--webkit-transition-property:width, left, top, height;
+-webkit-transition-property:width, left, top, height, -webkit-transform;
 -webkit-transition-duration: 1s;
 -webkit-transition-timing-function:ease;
+-moz-transition-property:width, left, top, height, -moz-transform;
+-moz-transition-duration: 1s;
+-moz-transition-timing-function:ease;
+transition-property:width, left, top, height, transform;
+transition-duration: 1s;
+transition-timing-function:ease;
+-webkit-user-select: none;
+-moz-user-select: none;
+user-select: none;
 }
 
 .box .options {
@@ -44,6 +53,15 @@ display:block;
 .box.identifiee {
 border:3px solid red;
 z-index:2;
+}
+.box.dragged {
+	z-index:2;
+	border:3px dotted white;
+}
+
+.boxdiv.flipped {
+-webkit-transform:perspective(1000px) rotateY(90deg);
+-moz-transform:perspective(1000px) rotateY(90deg);
 }
 
 .disposition_container {
@@ -70,4 +88,15 @@ background:orange;
 
 .disposition_before, .disposition_after {
 background:red;
+}
+
+#bouton_boite {
+	position:fixed;
+	z-index:3;
+	background:rgba(0,0,0,0.5);
+	width:150px;
+	color:white;
+-webkit-user-select: none;
+-moz-user-select: none;
+user-select: none;
 }
