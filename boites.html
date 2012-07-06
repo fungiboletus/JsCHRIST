@@ -31,10 +31,36 @@ $(document).ready(function() {
 	boiboites = new Boxes_layout(document.body, Boxes_DIRECTIONS.VERTICAL);
 	function bb() {
 		var box = boiboites.createBox();
+		box.front.appendChild(document.createTextNode('vive les canards'));
+
+		var visualizations = document.createElement('div');
+		visualizations.className = 'visualizations';
+		var visualizations_h = document.createElement('h3');
+		visualizations_h.appendChild(document.createTextNode('Visualisations'));
+		visualizations.appendChild(visualizations_h);
+		visualizations.appendChild(document.createTextNode('type de visualisation'));
+		box.back.appendChild(visualizations);
+
+		var options = document.createElement('div');
+		options.className = 'options';
+		var options_h = document.createElement('h3');
+		options_h.appendChild(document.createTextNode('Configuration'));
+		options.appendChild(options_h);
+		options.appendChild(document.createTextNode('ceci est un test'));
+		box.back.appendChild(options);
+
+		var data = document.createElement('div');
+		data.className = 'data';
+		var data_h = document.createElement('h3');
+		data_h.appendChild(document.createTextNode('Données'));
+		data.appendChild(data_h);
+		data.appendChild(document.createTextNode('liste des données'));
+		box.back.appendChild(data);
+
 		var color = get_random_color();
-		box.style.background = color;
-		box.id = "box_"+color.slice(1); 
-		return box;
+		box.front.style.background = color;
+		box.box.id = "box_"+color.slice(1); 
+		return box.box;
 	}
 	canvaas = bb();
 	boiboites.addBox(canvaas);
@@ -84,13 +110,14 @@ $(document).ready(function() {
 		drag_start_x = e.offsetX;
 		drag_start_y = e.offsetY;
 		var boite = bb();
+		boite.style.display = 'none';
 		boiboites.dragged_box = boite;
 		document.body.addEventListener('mousemove', drag);
 	});
 
 	var stop_drag = function() {
 		boiboites.drag_enabled = true;
-		boiboites.dragged_box = null;
+		//boiboites.dragged_box = null;
 		document.body.removeEventListener('mousemove', drag);
 		jbouton.animate({
 			top:'0px',
@@ -109,21 +136,15 @@ $(document).ready(function() {
 
 		setTimeout(function() {
 			jboxes.removeClass('flipped_animation');
-			if (!boiboites.front)
-			{
-				jboxes.find('.front').css({display: 'none'});
-				jboxes.find('.back').css({display: 'block'});
-			} else {
-				jboxes.find('.front').css({display: 'block'});
-				jboxes.find('.back').css({display: 'none'});
-			}
+			boiboites.toggleFrontMode();
 		}, 600);
 		if (boiboites.front)
 			jbouton.show();
 		else
 			jbouton.hide();
-		boiboites.front = !boiboites.front;
 	});
+
+	$('#flip').click();
 });
 	</script>
 <div id="bouton_boite" style="display:none;">Nouvelle Boite Magique</div>

@@ -1,4 +1,10 @@
+@font-face {
+font-family: FuturaPerso;
+src: url("futura.otf");
+}
+
 body {
+font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
 background:#32322A;
 position:absolute;
 top:0;
@@ -8,16 +14,21 @@ right:0;
 overflow:hidden;
 }
 
+h1,h2,h3,h4,h5,h6 {
+font-family:FuturaPerso, "Helvetica Neue",Helvetica,Arial,sans-serif;
+margin:0;
+}
+
 .box {
 position:absolute;
 top:50%;
 left:50%;
 width:0px;
 height:0px;
+overflow:auto;
 }
 
 .boxdiv {
-background:pink;
 -webkit-transition-property:width, left, top, height, -webkit-transform;
 -webkit-transition-duration: 0.6s;
 -webkit-transition-timing-function:ease;
@@ -27,30 +38,30 @@ background:pink;
 transition-property:width, left, top, height, transform;
 transition-duration: 0.6s;
 transition-timing-function:ease;
--webkit-user-select: none;
--moz-user-select: none;
-user-select: none;
-
 border-radius:10px;
 box-shadow:0px 0px 4px rgba(0,0,0,0.5);
 }
 
 .boxdiv .front, .boxdiv .back {
 padding:4px 8px 4px 8px;
-}
-.boxdiv .back {
-box-shadow:1px 1px 8px rgba(0,0,0,0.5) inset;
-border:2px solid rgba(100,100,100,0.2);
-border-radius:8px;
-background:url(fond_metal.jpeg);
 position:absolute;
 top:0;
 left:0;
 bottom:0;
 right:0;
+box-shadow:1px 1px 8px rgba(0,0,0,0.5) inset;
+border:2px solid rgba(100,100,100,0.2);
+border-radius:8px;
+}
+.boxdiv .back {
+-webkit-user-select: none;
+-moz-user-select: none;
+user-select: none;
+cursor:move;
+background:url(fond_metal.jpeg);
 }
 
-.box .options {
+/*.box .options {
 position:absolute;
 left:50%;
 top:50%;
@@ -82,6 +93,7 @@ border-color:white;
 .boxdiv.flipped_animation {
 -webkit-transform:rotateY(90deg);
 -moz-transform:rotateY(90deg);
+transform:rotateY(90deg);
 }
 
 .disposition_container {
@@ -120,6 +132,7 @@ background:red;
 -moz-user-select: none;
 user-select: none;
 border:3px solid orange;
+cursor:pointer;
 }
 
 #flip {

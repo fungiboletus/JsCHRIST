@@ -21,13 +21,18 @@ function Boxes_layout(rootNode, direction)
 			var jdragged_box = jNode.find('.boxdiv.identifiee');
 			jdragged_box.addClass('dragged');
 			obj.dragged_box = jdragged_box[0];}});
-	jNode.mouseup(function(){if (!obj.front && obj.drag_enabled){
-		$(obj.dragged_box).removeClass('dragged');
+
+	jNode.mouseup(function(){if (!obj.front && obj.drag_enabled && obj.dragged_box){
+		if (!obj.dragged_box.style.top && !obj.dragged_box.style.left)
+			obj.rootNode.removeChild(obj.dragged_box);
+		else
+			$(obj.dragged_box).removeClass('dragged');
+	
 		obj.dragged_box = null;
 	}});
 
 	jNode.mousemove(function(e){
-		boiboites.hover(e.pageX, e.pageY);
+		obj.hover(e.pageX, e.pageY);
 	});
 };
 
@@ -41,16 +46,18 @@ Boxes_layout.prototype =
 
 		var front = document.createElement('div');
 		front.className = 'front';
-		front.appendChild(document.createTextNode('vive les canards'));
 		div.appendChild(front);
 
 		var back = document.createElement('div');
 		back.className = 'back';
-		back.appendChild(document.createTextNode('ceci est un test'));
-		back.style.display = 'none';
+
+		if (this.front)
+			back.style.display = 'none';
+		else
+			front.style.display = 'none';
 
 		div.appendChild(back);
-		return this.transformBox(div);
+		return {box: this.transformBox(div), front: front, back: back};
 	},
 
 	transformBox: function(div)
@@ -63,6 +70,14 @@ Boxes_layout.prototype =
 	addBox: function(box, container)
 	{
 		this.rootContainer.addBox(box, container ? container : this.rootContainer);
+	},
+
+	toggleFrontMode: function()
+	{
+		var jnode = $(this.rootNode);
+		jnode.find(this.front ? '.front' : '.back').hide();
+		jnode.find(this.front ? '.back' : '.front').show();
+		this.front = !this.front;
 	},
 
 	manageSize: function(obj)
@@ -92,6 +107,7 @@ Boxes_layout.prototype =
 				if (box.style.left != x) box.style.left = x;
 				if (box.style.height != height) box.style.height = height;
 				if (box.style.width != width) box.style.width = width;
+				if (box.style.display == 'none') box.style.display = 'block';
 			});
 	},
 
@@ -175,6 +191,73 @@ Boxes_layout.prototype =
 					$(box).removeClass('identifiee');
 				}
 			});
+	},
+
+	changeLayout: function (new_layout) {
+		new_layout(this, $(this.rootNode).find('.boxdiv'));
+		this.equilibrate();
+	},
+
+	layouts:
+	{
+		vertical: function(obj, boxes) {
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+			for (var i = 0; i < boxes.length; ++i)
+				obj.addBox(boxes[i]);
+
+		},
+
+		horizontal: function(obj, boxes) {
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
+			for (var i = 0; i < boxes.length; ++i)
+				obj.addBox(boxes[i]);
+		},
+
+		grid: function(obj, boxes) {
+			var nb_boxes = boxes.length;
+			var sqrt = Math.sqrt(nb_boxes);
+			var lines = Math.ceil(sqrt);
+			var columns = Math.round(sqrt);
+
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+			var cpt = 0;
+			for (var i = 0; i < lines; ++i) {
+				var line = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
+				obj.addBox(line);
+				for (var j = 0; j < columns && cpt < nb_boxes; ++j)
+					obj.addBox(boxes[cpt++], line);
+			}
+		},
+
+		multi: function(obj, boxes) {
+			var nb_boxes = boxes.length;
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+			var cpt = 0;
+
+			if (nb_boxes > cpt) {
+				obj.addBox(boxes[cpt++]);
+				if (nb_boxes > cpt) {
+					var container = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
+					obj.addBox(container);
+					obj.addBox(boxes[cpt++], container);
+					if (nb_boxes > cpt) {
+						obj.addBox(boxes[cpt++], container);
+						if (nb_boxes > cpt) {
+							var container_vertical = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+							obj.addBox(container_vertical, container);
+							for (var i = 0; i < 3 && cpt < nb_boxes; ++i)
+								obj.addBox(boxes[cpt++], container_vertical);
+
+							for (var i = 0; i < 2 && cpt < nb_boxes; ++i)
+								obj.addBox(boxes[cpt++], container);
+
+							while (cpt < nb_boxes)
+								obj.addBox(boxes[cpt++]);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
