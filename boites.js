@@ -1,12 +1,18 @@
+
+/**
+ *  Create a layout for a HTML element.
+ *
+ *	@param rootNode The HTML element in which is the layout
+ *	@param direction The default direction of the layout (vertical or horizontal)
+ */
 function Boxes_layout(rootNode, direction)
 {
 	if (!(rootNode instanceof HTMLElement)) alert("The rootNode parameter is not a HTML element");
 	this.rootNode = rootNode;
 
-	//$(rootNode).mousemove(function(e){console.log(e);});
-
 	this.rootContainer = new Boxes_container(direction); 
 
+	// Manage size changes
 	this.manageSize();
 	$(window).resize(this, this.manageSize);
 
@@ -14,23 +20,34 @@ function Boxes_layout(rootNode, direction)
 	this.drag_enabled = true;
 	this.front = true;
 
+	// Manage boxes's drag and drop
 	var jNode = $(this.rootNode);
 	var obj = this;
 	jNode.mousedown(function(){
 		if (!obj.front && obj.drag_enabled) {
+			// Recovery of the dragged box
 			var jdragged_box = jNode.find('.boxdiv.identifiee');
+
 			jdragged_box.addClass('dragged');
-			obj.dragged_box = jdragged_box[0];}});
+			obj.dragged_box = jdragged_box[0];
+		}
+	});
 
-	jNode.mouseup(function(){if (!obj.front && obj.drag_enabled && obj.dragged_box){
-		if (!obj.dragged_box.style.top && !obj.dragged_box.style.left)
-			obj.rootNode.removeChild(obj.dragged_box);
-		else
-			$(obj.dragged_box).removeClass('dragged');
-	
-		obj.dragged_box = null;
-	}});
+	jNode.mouseup(function(){
+		if (!obj.front && obj.drag_enabled && obj.dragged_box){
+			
+			// If the box didn't find a place to live
+			if (!obj.dragged_box.style.top && !obj.dragged_box.style.left)
+				// We have to kill it :( poor child…
+				obj.rootNode.removeChild(obj.dragged_box);
+			else
+				$(obj.dragged_box).removeClass('dragged');
+		
+			obj.dragged_box = null;
+		}
+	});
 
+	// Handling mouse position
 	jNode.mousemove(function(e){
 		obj.hover(e.pageX, e.pageY);
 	});
@@ -40,6 +57,13 @@ function Boxes_layout(rootNode, direction)
 
 Boxes_layout.prototype = 
 {
+	/**
+	 *	Create a new box for the layout.
+	 *
+	 *	The box have two faces. Frontface (default), and backface.
+	 *
+	 *	@return The box
+	 */
 	createBox: function()
 	{
 		var div = document.createElement('div');
@@ -60,6 +84,14 @@ Boxes_layout.prototype =
 		return {box: this.transformBox(div), front: front, back: back};
 	},
 
+	/**
+	 *	Attach the box to the layout.
+	 *
+	 *	createBox doesn't do this.
+	 *
+	 *	@param div The box to attach
+	 *	@return	The same box, but attached
+	 */
 	transformBox: function(div)
 	{
 		$(div).addClass('box boxdiv');
@@ -67,11 +99,20 @@ Boxes_layout.prototype =
 		return div;
 	},
 
+	/**
+	 *	Place the box in the layout.
+	 *
+	 *	@param box The box to place.
+	 *	@param container The optionnal container where to place the box.
+	 */
 	addBox: function(box, container)
 	{
 		this.rootContainer.addBox(box, container ? container : this.rootContainer);
 	},
 
+	/**
+	 *	Toggle the display of boxes's sides.
+	 */
 	toggleFrontMode: function()
 	{
 		var jnode = $(this.rootNode);
@@ -80,6 +121,11 @@ Boxes_layout.prototype =
 		this.front = !this.front;
 	},
 
+	/**
+	 *	Update the layout size.
+	 *
+	 *	@param obj Optionnal layout reference.
+	 */
 	manageSize: function(obj)
 	{
 		var obj = obj == null ? this : obj.data;
@@ -88,16 +134,32 @@ Boxes_layout.prototype =
 		obj.equilibrate();
 	},
 
+	/**
+	 *	Exec the callback function for each box in the layout.
+	 *
+	 *	The passed arguments for the function are :
+	 *		* The box
+	 *		* x position of the box
+	 *		* y position of the box
+	 *		* width of the box
+	 *		* height of the box
+	 *		* stack of containers in which the box is
+	 *
+	 *	@param callback The function to execute.
+	 */
 	processing: function(callback)
 	{
 		this.rootContainer.processing(0, 0, this.width, this.height, callback);
 	},
 
+	/**
+	 *	Place every box to his place.
+	 */
 	equilibrate: function()
 	{
 		var marge = 3;
 		this.processing(
-			function (box, x, y, width, height, containers) {
+			function (box, x, y, width, height) {
 				y = y + marge + 'px';
 				x = x + marge + 'px';
 				height = height - marge - marge + 'px';
@@ -107,10 +169,17 @@ Boxes_layout.prototype =
 				if (box.style.left != x) box.style.left = x;
 				if (box.style.height != height) box.style.height = height;
 				if (box.style.width != width) box.style.width = width;
+
+				// Even the hidden boxes are showed
 				if (box.style.display == 'none') box.style.display = 'block';
 			});
 	},
 
+	/**
+	 *	Manage the mouse location above the layout.
+	 *
+	 *	The processing is about the drag and drop.
+	 */
 	hover: function(mouse_x, mouse_y)
 	{
 		var obj = this;
@@ -119,16 +188,20 @@ Boxes_layout.prototype =
 			function (box, x, y, width, height, containers) {
 				var box_mouse_x = mouse_x - x;
 				var box_mouse_y = mouse_y -y;
+				// If the mouse is over the current box
 				if (box_mouse_x >= 0 && box_mouse_x <= width &&
 					box_mouse_y >= 0 && box_mouse_y <= height)
 				{
+					// If this is not the dragged mouse, is just an identifed box
 					if (!div)
 						$(box).addClass('identifiee');
 
+					// If the box is the dragged box, we have to do nothing here 
 					if (!div || div == box) return;
-					var box_center_x = x + width / 2;
-					var box_center_y = y + height / 2;
 
+					/** Fast method using vector product
+					 * for determine if a point is in a triangle.
+					 */
 					var in_triangle = function(a_x, a_y, b_x, b_y, c_x, c_y, p_x, p_y) {
 						var geoprog = function(a_x, a_y, b_x, b_y, c_x, c_y) {
 							return (a_x * (b_y - c_y) + b_x * (c_y - a_y) + c_x * (a_y - b_y)) >= 0;
@@ -140,15 +213,24 @@ Boxes_layout.prototype =
 						return p1 > 0 && p2 > 0 && p3 > 0 || p1 < 0 && p2 < 0 && p3 < 0;
 					};
 
-					//console.log("x: "+x+" y: "+y+" width: "+width+" height: "+height);
-
+					/**
+					 *	Add the dragged box in the good container.
+					 *
+					 *	@param containers Stack of containers
+					 *	@param position Top/Right/Bottom/Left	
+					 *	@param target	The neighbor box
+					 *
+					 *	@return the result of the correct placement, or nothing
+					 */
 					var addBox = function(containers, position, target){
 
 						var container = containers.pop();
 
+						// If no one container is good, do nothing
 						if (!container)
 							return;
 
+						// Try to find a good container in which add the box 
 						if (container.direction == Boxes_DIRECTIONS.VERTICAL)
 						{
 							if (position == 0)
@@ -164,9 +246,13 @@ Boxes_layout.prototype =
 								return obj.rootContainer.addBoxLeft(div, target, container);
 						}
 
+						// If no container is good, try with the container from above
 						return arguments.callee(containers, position, container);
 					} 
 
+					// Locate where is the mouse in the box
+					var box_center_x = x + width / 2;
+					var box_center_y = y + height / 2;
 					var position = -1;
 					if (in_triangle(x, y, x+width, y,
 						box_center_x, box_center_y, mouse_x, mouse_y))
@@ -182,9 +268,10 @@ Boxes_layout.prototype =
 						x, y+height, mouse_x, mouse_y))
 						position = 3; // LEFT
 
+					// Try to add the box 
 					addBox(containers, position, box);
 
-					//console.log(obj);
+					// And show to the user the wonderful result
 					obj.equilibrate();
 
 				} else {
@@ -193,13 +280,20 @@ Boxes_layout.prototype =
 			});
 	},
 
+	/**
+	 *	Change the layout's disposition.
+	 *
+	 *	@param new_layout	The new layout (really)
+	 */
 	changeLayout: function (new_layout) {
 		new_layout(this, $(this.rootNode).find('.boxdiv'));
 		this.equilibrate();
 	},
 
+	// Some usefull layouts
 	layouts:
 	{
+		/** Simple vertical layout */
 		vertical: function(obj, boxes) {
 			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
 			for (var i = 0; i < boxes.length; ++i)
@@ -207,14 +301,20 @@ Boxes_layout.prototype =
 
 		},
 
+		/** Simple horizontal layout */
 		horizontal: function(obj, boxes) {
 			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
 			for (var i = 0; i < boxes.length; ++i)
 				obj.addBox(boxes[i]);
 		},
 
+		/** Grid layout */
 		grid: function(obj, boxes) {
 			var nb_boxes = boxes.length;
+
+			// The size of grid is calculed just one time
+			// It's intersting to execute this function when the number
+			// of boxes have changed
 			var sqrt = Math.sqrt(nb_boxes);
 			var lines = Math.ceil(sqrt);
 			var columns = Math.round(sqrt);
@@ -229,6 +329,7 @@ Boxes_layout.prototype =
 			}
 		},
 
+		/** Complex and weird layout */
 		multi: function(obj, boxes) {
 			var nb_boxes = boxes.length;
 			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
