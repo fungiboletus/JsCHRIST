@@ -38,8 +38,8 @@ function Boxes_layout(rootNode, direction)
 			
 			// If the box didn't find a place to live
 			if (!obj.dragged_box.style.top && !obj.dragged_box.style.left)
-				// We have to kill it :( poor child…
-				obj.rootNode.removeChild(obj.dragged_box);
+				// We could find a place 
+				obj.addBoxInBestPlace(obj.dragged_box);
 			else
 				$(obj.dragged_box).removeClass('dragged');
 		
@@ -281,6 +281,26 @@ Boxes_layout.prototype =
 	},
 
 	/**
+	 *	Add a box in the best container.
+	 *
+	 *	@param box The box to place
+	 */
+	addBoxInBestPlace: function(box) {
+		var best_container = this.rootContainer;
+
+		// Find the last container with no more children
+		this.processing(
+			function (box, x, y, width, height, containers) {
+				var container = containers[containers.length -1];
+				if (container.boxes.length <= best_container.boxes.length)
+					best_container = container;
+			});
+
+		this.addBox(box, best_container);
+		this.equilibrate();
+	}, 
+
+	/**
 	 *	Change the layout's disposition.
 	 *
 	 *	@param new_layout	The new layout (really)
@@ -306,6 +326,39 @@ Boxes_layout.prototype =
 			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
 			for (var i = 0; i < boxes.length; ++i)
 				obj.addBox(boxes[i]);
+		},
+
+		/** Vertical split layout */
+		verticalSplit: function(obj, boxes) {
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
+			if (boxes.length > 0)
+			{
+				obj.addBox(boxes[0]);
+				if (boxes.length > 1)
+				{
+					var container = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+					obj.addBox(container);
+					for (var i = 1; i < boxes.length; ++i)
+						obj.addBox(boxes[i], container);
+				}
+			}
+
+		},
+
+		/** Horizontal split layout */
+		horizontalSplit: function(obj, boxes) {
+			obj.rootContainer = new Boxes_container(Boxes_DIRECTIONS.VERTICAL);
+			if (boxes.length > 0)
+			{
+				obj.addBox(boxes[0]);
+				if (boxes.length > 1)
+				{
+					var container = new Boxes_container(Boxes_DIRECTIONS.HORIZONTAL);
+					obj.addBox(container);
+					for (var i = 1; i < boxes.length; ++i)
+						obj.addBox(boxes[i], container);
+				}
+			}
 		},
 
 		/** Grid layout */
@@ -363,8 +416,16 @@ Boxes_layout.prototype =
 }
 
 Boxes_DIRECTIONS = {VERTICAL: 1, HORIZONTAL: 2};
+
+/** Used for create the container's name */
 var nb_boxes = 65;
 
+/**
+ *	Container of boxes or containers.
+ *
+ *	Used in internal by Boxes_layout.
+ *	@param direction The direction of the container
+ */
 function Boxes_container(direction)
 {
 	this.name = String.fromCharCode(nb_boxes++);
@@ -396,6 +457,18 @@ Boxes_container.prototype =
 		return str;
 	},
 
+	/**
+	 *	Add the box in the target container.
+	 *
+	 *	The target container could be a child. This function is recursive.
+	 *
+	 *	A function could be called when the box is added. The container is
+	 *		passed by parameters, and the box isn't added automatically. 
+	 *
+	 *	@param box The box to add
+	 *	@param container The container in which add the box
+	 *	@param action An optionnal function to execute when the box is added
+	 */ 
 	addBox: function(box, container, action)
 	{
 		for (var i = 0; i < this.boxes.length; ++i)
@@ -405,10 +478,12 @@ Boxes_container.prototype =
 			if (ibox instanceof Boxes_container)
 			{
 				ibox.addBox(box, container, action);
+				// Removing empty containers (for eliminate empty areas)
 				if (ibox.boxes.length == 0)
 					this.boxes.remove(ibox);
 			}
 
+			// If we find the box in another container, we change his location
 			if (ibox !== container && ibox === box)
 				this.boxes.remove(box);
 
@@ -417,41 +492,57 @@ Boxes_container.prototype =
 		if (this === container)
 		{
 			if (action)
-				action(this.boxes, box, container);
+				action(this);
 			else
 				this.boxes.push(box);
 		}
 	},
 
+	/** Add the box above the target.*/
 	addBoxTop: function(box, target, container)
 	{
 		var obj  = this;
-		this.addBox(box,container, function(boxes, box, container) {
+		this.addBox(box,container, function(container) {
+			var boxes = container.boxes;
 			boxes.splice(boxes.indexOf(target), 0, box);			
 		}); 
 	},
 
+	/** Add the box right to the target.*/
 	addBoxRight: function(box, target, container)
 	{
-		this.addBox(box,container, function(boxes, box) {
+		this.addBox(box,container, function(container) {
+			var boxes = container.boxes;
 			boxes.splice(boxes.indexOf(target)+1, 0, box);			
 		}); 
 	},
 
+	/** Add the box below the target.*/
 	addBoxBottom: function(box, target, container)
 	{
-		this.addBox(box,container, function(boxes, box) {
+		this.addBox(box,container, function(container) {
+			var boxes = container.boxes;
 			boxes.splice(boxes.indexOf(target)+1, 0, box);			
 		}); 
 	},
 
+	/** Add the box left to the target.*/
 	addBoxLeft: function(box, target, container)
 	{
-		this.addBox(box,container, function(boxes, box) {
+		this.addBox(box,container, function(container) {
+			var boxes = container.boxes;
 			boxes.splice(boxes.indexOf(target), 0, box);			
 		}); 
 	},
-
+	/**
+	 *	Exec the callback function for each box in the layout.
+	 *		@param jmp_x X position of the box
+	 *		@param jmp_y Y position of the box
+	 *		@param width Width of the box
+	 *		@param height Height of the box
+	 *		@param callback The callback to execute (more info in Box_layout.processing)
+	 *		@param containers Stack of containers in which the boxes are
+	 */	
 	processing: function(jmp_x, jmp_y, width, height, callback, containers)
 	{
 		var height_jmp = 0;
@@ -468,6 +559,7 @@ Boxes_container.prototype =
 			width_jmp = width;
 		}
 
+		// Manage the stack of containers
 		if (containers instanceof Array)
 			containers.push(this);
 		else
@@ -480,6 +572,8 @@ Boxes_container.prototype =
 
 			var box = this.boxes[i];
 
+			// Recursive call of the processing function
+			// The slice function is very important, lot of time was wasted here
 			if (box instanceof Boxes_container)
 				box.processing(x, y, width, height, callback, containers.slice(0));
 			else
