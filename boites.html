@@ -131,30 +131,38 @@ $(document).ready(function() {
 
 	var drag = function(e){
 		jbouton.css({
-			top: (e.pageY-drag_start_y)+'px', 
-			left: (e.pageX-drag_start_x)+'px'
+			top: (e.clientY-drag_start_y)+'px', 
+			left: (e.clientX-drag_start_x)+'px'
 		});
 	};
 
 	jbouton.mousedown(function(e) {
-		boiboites.drag_enabled = false;
-		drag_start_x = e.offsetX;
-		drag_start_y = e.offsetY;
+		/*boiboites.drag_enabled = false;*/
+		if (e.offsetX)
+		{
+			drag_start_x = e.offsetX;
+			drag_start_y = e.offsetY;
+		} else {
+			var pos = $(e.target).position();
+			console.log(e.clientX);
+			drag_start_x = e.clientX - pos.left;
+			drag_start_y = e.clientY - pos.top;
+		}
 		var boite = bb();
 		boite.style.display = 'none';
 		boiboites.dragged_box = boite;
 		document.body.addEventListener('mousemove', drag);
 	});
 
-	var stop_drag = function() {
-		boiboites.drag_enabled = true;
+	var stop_drag = function(e) {
+		/*boiboites.drag_enabled = true;*/
 		//boiboites.dragged_box = null;
 		document.body.removeEventListener('mousemove', drag);
 		jbouton.animate({
 			top:'0px',
 			left: '0px'}, 250);
 	};
-	jbouton.mouseup(stop_drag);
+	$(document.body).mouseup(stop_drag);
 	//jbouton.mouseout(stop_drag);
 	//window.setInterval(bb, 500);
 

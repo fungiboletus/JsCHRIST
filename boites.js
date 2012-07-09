@@ -24,7 +24,7 @@ function Boxes_layout(rootNode, direction)
 	var jNode = $(this.rootNode);
 	var obj = this;
 	jNode.mousedown(function(){
-		if (!obj.front && obj.drag_enabled) {
+		if (!obj.front && obj.drag_enabled && obj.dragged_box == null) {
 			// Recovery of the dragged box
 			var jdragged_box = jNode.find('.boxdiv.identifiee');
 
